@@ -30,6 +30,7 @@ button {
 /* TOP TOOLBAR */
 
 .top-toolbar {
+  position: relative;
   height: 64px;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
@@ -69,6 +70,61 @@ button {
   font-size: 15px;
   font-weight: 600;
   color: #111827;
+}
+
+.file-dropdown-menu {
+  position: absolute;
+  top: 44px;
+  left: 195px;
+  width: 220px;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 2px;
+
+  padding: 8px 0;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.16);
+
+  z-index: 9999;
+}
+
+.file-dropdown-menu button {
+  width: 100%;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 18px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+
+  color: #242424;
+
+  text-align: left;
+  cursor: pointer;
+
+  transition: background 0.1s ease;
+}
+
+.file-dropdown-menu button:hover {
+  background: #f3f3f3;
+}
+
+.file-dropdown-menu button:active {
+  background: #e5e5e5;
 }
 
 /* TOOLBAR MENU */
@@ -1410,4 +1466,462 @@ button {
   border: 1px solid #d1d5db;
   background: #ffffff;
   cursor: pointer;
+}
+
+/* =================================
+   FILE BACKSTAGE SIZE IMPROVEMENT
+================================= */
+
+.file-backstage-sidebar {
+  width: 138px;
+  min-width: 138px;
+}
+
+.file-back-button {
+  width: 48px;
+  height: 48px;
+  font-size: 26px;
+}
+
+/* LEFT MENU */
+
+.file-backstage-nav button,
+.file-backstage-bottom button {
+  height: 42px;
+  padding: 0 24px;
+  font-size: 14px;
+}
+
+/* MAIN CONTENT */
+
+.file-backstage-content {
+  padding: 38px 64px 60px;
+}
+
+.file-backstage-content h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.backstage-section h2 {
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+/* BIGGER THEME CARDS */
+
+.theme-row {
+  gap: 38px;
+  padding: 0 20px 32px;
+}
+
+.theme-card {
+  width: 180px;
+}
+
+.theme-preview {
+  width: 180px;
+  height: 105px;
+  font-size: 14px;
+}
+
+.theme-card span {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* MORE THEMES */
+
+.more-themes-row {
+  max-width: 100%;
+  padding: 18px 0;
+}
+
+.more-themes-row button {
+  font-size: 14px;
+}
+
+/* RECENT */
+
+.recent-section {
+  margin-top: 35px;
+}
+
+.recent-tabs {
+  gap: 35px;
+  margin-bottom: 20px;
+}
+
+.recent-tabs button {
+  font-size: 16px;
+}
+
+.recent-table-header {
+  grid-template-columns: 1fr 240px;
+  padding: 14px 20px;
+  font-size: 14px;
+}
+
+.recent-empty {
+  padding: 24px 20px;
+  font-size: 14px;
+}
+/* ===== FILE BACKSTAGE MAIN LAYOUT FIX ===== */
+
+.file-backstage {
+  width: 100%;
+  height: calc(100vh - 64px);
+  display: flex;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+/* LEFT SIDEBAR */
+
+.file-backstage-sidebar {
+  width: 180px;
+  min-width: 180px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f3eeee;
+  border-right: 1px solid #ddd;
+}
+
+.file-backstage-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-backstage-nav button,
+.file-backstage-bottom button {
+  width: 100%;
+  height: 44px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.file-backstage-nav button:hover,
+.file-backstage-bottom button:hover {
+  background: #e8e3e3;
+}
+
+.file-backstage-bottom {
+  margin-top: auto;
+  padding-bottom: 20px;
+}
+
+/* BACK BUTTON */
+
+.file-back-button {
+  width: 55px;
+  height: 55px;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* RIGHT CONTENT */
+
+.file-backstage-content {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: 45px 65px;
+}
+
+.file-backstage-content h1 {
+  margin: 0 0 32px;
+  font-size: 30px;
+}
+
+.backstage-section h2 {
+  font-size: 24px;
+  margin-bottom: 25px;
+}
+
+/* THEMES */
+
+.theme-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.theme-card {
+  width: 190px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.theme-preview {
+  width: 190px;
+  height: 110px;
+  border: 1px solid #ccc;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-card span {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* =========================================
+   FILE BACKSTAGE - POWERPOINT SIZE LAYOUT
+========================================= */
+
+.file-backstage-content {
+  flex: 1;
+  width: calc(100% - 180px);
+  height: 100%;
+  padding: 36px 55px 50px;
+  overflow-y: auto;
+}
+
+/* Welcome heading */
+
+.file-backstage-content h1 {
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 28px;
+}
+
+/* New heading */
+
+.backstage-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 28px;
+}
+
+/* Theme cards row */
+
+.theme-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 0 0 30px;
+}
+
+/* Theme card */
+
+.theme-card {
+  width: 200px;
+  flex: 0 0 200px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Theme image / preview */
+
+.theme-preview {
+  width: 200px;
+  height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+
+  font-size: 15px;
+
+  transition: box-shadow 0.15s ease,
+              border-color 0.15s ease;
+}
+
+.theme-card:hover .theme-preview {
+  border-color: #999;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+
+.theme-card span {
+  display: block;
+  margin-top: 12px;
+
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+
+  color: #222;
+}
+
+/* More themes */
+
+.more-themes-row {
+  width: 100%;
+  padding: 18px 0 25px;
+
+  display: flex;
+  justify-content: flex-end;
+
+  border-top: 1px solid #ddd;
+}
+
+.more-themes-row button {
+  border: none;
+  background: transparent;
+
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Recent section */
+
+.recent-section {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.recent-tabs {
+  display: flex;
+  gap: 35px;
+
+  margin-bottom: 20px;
+}
+
+.recent-tabs button {
+  border: none;
+  background: transparent;
+
+  padding: 8px 5px;
+
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* Recent table */
+
+.recent-table-header {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr 280px;
+
+  padding: 15px 18px;
+
+  border-bottom: 1px solid #d1d5db;
+
+  font-size: 15px;
+}
+
+.recent-empty {
+  width: 100%;
+
+  padding: 25px 18px;
+
+  border-bottom: 1px solid #d1d5db;
+
+  font-size: 15px;
+}
+
+/* Sidebar slightly wider like PowerPoint */
+
+.file-backstage-sidebar {
+  width: 180px;
+  min-width: 180px;
+}
+
+.recent-presentation-item {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  align-items: center;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid #d1d5db;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+.recent-presentation-item:hover {
+  background: #f0f0f0;
+}
+
+.open-presentation-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+}
+
+.open-presentation-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  background: white;
+
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.open-presentation-item:hover {
+  background: #f5f5f5;
+}
+.export-screen {
+  padding: 24px 40px;
+}
+
+.export-screen h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+  width: 420px;
+}
+
+.export-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+
+  padding: 18px 20px;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  cursor: pointer;
+  text-align: left;
+}
+
+.export-options button:hover {
+  background: #f3f4f6;
+}
+
+.export-options button strong {
+  font-size: 16px;
+}
+
+.export-options button span {
+  font-size: 13px;
 }

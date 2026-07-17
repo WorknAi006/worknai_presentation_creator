@@ -1,4 +1,10 @@
 import {
+  createPresentation,
+  updatePresentation,
+  getPresentations,
+} from "../services/presentationApi";
+
+import {
   useCallback,
   useRef,
   useState,
@@ -22,6 +28,9 @@ import {
 
 import "../styles/editor.css";
 
+import FileBackstage from "../editor/file/FileBackstage";
+
+
 function PresentationEditor() {
   const editorCanvasRef = useRef(null);
 
@@ -40,9 +49,19 @@ function PresentationEditor() {
   const [activeTab, setActiveTab] =
     useState("Home");
 
+  const [
+    presentationId,
+    setPresentationId,
+    ] = useState(null);
+
   const [slides, setSlides] = useState(
     slidesRef.current
   );
+
+  const [
+  presentationTitle,
+  setPresentationTitle,
+] = useState("My Presentation");
 
   const [
     activeSlideId,
@@ -173,6 +192,35 @@ function PresentationEditor() {
   const handleRedo = () => {
     editorCanvasRef.current?.redo();
   };
+  const handleAlignLeft = () => {
+  editorCanvasRef.current
+    ?.alignLeft();
+};
+
+const handleAlignCenter = () => {
+  editorCanvasRef.current
+    ?.alignCenter();
+};
+
+const handleAlignRight = () => {
+  editorCanvasRef.current
+    ?.alignRight();
+};
+
+const handleAlignTop = () => {
+  editorCanvasRef.current
+    ?.alignTop();
+};
+
+const handleAlignMiddle = () => {
+  editorCanvasRef.current
+    ?.alignMiddle();
+};
+
+const handleAlignBottom = () => {
+  editorCanvasRef.current
+    ?.alignBottom();
+};
   const handleBringToFront = () => {
   editorCanvasRef.current
     ?.bringToFront();
@@ -211,6 +259,25 @@ const handleSendToBack = () => {
   editorCanvasRef.current
     ?.sendToBack();
 };
+const handleGroup = () => {
+  editorCanvasRef.current?.groupSelected();
+};
+
+const handleUngroup = () => {
+  editorCanvasRef.current?.ungroupSelected();
+};
+
+const handleDistributeHorizontal =
+  () => {
+    editorCanvasRef.current
+      ?.distributeHorizontal();
+  };
+
+const handleDistributeVertical =
+  () => {
+    editorCanvasRef.current
+      ?.distributeVertical();
+  };
 
   const handleUpdateObject = (
   property,
@@ -401,6 +468,313 @@ const handleSendToBack = () => {
       );
   };
 
+  const handleNewPresentation = async () => {
+  const newSlide = createBlankSlide();
+
+  // Reset presentation ID
+  // Next Save will create NEW MongoDB document
+  setPresentationId(null);
+
+  // Reset slides
+  updateSlides([newSlide]);
+
+  // Set new slide active
+  updateActiveSlideId(newSlide.id);
+
+  // Clear selected object
+  setSelectedObject(null);
+
+  // Load blank canvas
+  await editorCanvasRef.current
+    ?.loadCanvasJSON(
+      newSlide.canvasJSON
+    );
+
+  // Return to editor
+  setActiveTab("Home");
+};
+  
+  const handleSavePresentation = async () => {
+  try {
+    // Save latest canvas data of current slide
+    const updatedSlides = saveCurrentSlide();
+
+    const presentationData = {
+      title: presentationTitle,
+      slides: updatedSlides,
+      thumbnail:
+        updatedSlides[0]?.preview || "",
+    };
+
+    let result;
+
+    // First save -> Create new presentation
+    if (!presentationId) {
+      result = await createPresentation(
+        presentationData
+      );
+
+      // Store MongoDB presentation ID
+      setPresentationId(result._id);
+
+      console.log(
+        "Presentation created:",
+        result
+      );
+    } else {
+      // Next saves -> Update same presentation
+      result = await updatePresentation(
+        presentationId,
+        presentationData
+      );
+
+      console.log(
+        "Presentation updated:",
+        result
+      );
+    }
+
+    alert(
+      presentationId
+        ? "Presentation updated successfully!"
+        : "Presentation saved successfully!"
+    );
+  } catch (error) {
+    console.error(
+      "Presentation save failed:",
+      error
+    );
+
+    alert("Failed to save presentation.");
+  }
+};
+
+const handleSaveAsPresentation = async () => {
+  try {
+    const newTitle = window.prompt(
+      "Enter presentation name:",
+      presentationTitle
+    );
+
+    if (!newTitle || !newTitle.trim()) {
+      return;
+    }
+
+    const updatedSlides = saveCurrentSlide();
+
+    const presentationData = {
+      title: newTitle.trim(),
+      slides: updatedSlides,
+      thumbnail:
+        updatedSlides[0]?.preview || "",
+    };
+
+    // Save As always creates a NEW presentation
+    const result = await createPresentation(
+      presentationData
+    );
+
+    // New copy becomes current presentation
+    setPresentationId(result._id);
+    setPresentationTitle(newTitle.trim());
+
+    alert(
+      `"${newTitle.trim()}" saved successfully!`
+    );
+
+    // Return to editor
+    setActiveTab("Home");
+  } catch (error) {
+    console.error(
+      "Save As failed:",
+      error
+    );
+
+    alert("Failed to save presentation.");
+  }
+};
+
+ const handleOpenPresentation = async (
+  presentation
+) => {
+  try {
+    if (
+      !presentation?.slides ||
+      presentation.slides.length === 0
+    ) {
+      alert(
+        "This presentation has no slides."
+      );
+      return;
+    }
+
+    // Current MongoDB ID
+    setPresentationId(
+      presentation._id
+    );
+
+    setPresentationTitle(
+  presentation.title || "Untitled Presentation"
+);
+
+    // Load slides
+    updateSlides(
+      presentation.slides
+    );
+
+    // First slide
+    const firstSlide =
+      presentation.slides[0];
+
+    updateActiveSlideId(
+      firstSlide.id
+    );
+
+    setSelectedObject(null);
+
+    // Return to editor first
+    setActiveTab("Home");
+
+    // Load Fabric canvas
+    setTimeout(async () => {
+      await editorCanvasRef.current
+        ?.loadCanvasJSON(
+          firstSlide.canvasJSON
+        );
+    }, 0);
+
+  } catch (error) {
+    console.error(
+      "Open presentation failed:",
+      error
+    );
+
+    alert(
+      "Failed to open presentation."
+    );
+  }
+};
+
+
+const handleLoadPresentations = async () => {
+  try {
+    const presentations =
+      await getPresentations();
+
+    console.log(
+      "Saved presentations:",
+      presentations
+    );
+
+    if (!presentations.length) {
+      alert("No saved presentations found.");
+      return;
+    }
+
+    // आत्ता testing साठी latest presentation load करू
+    const presentation =
+      presentations[
+        presentations.length - 1
+      ];
+
+    if (
+      !presentation.slides ||
+      presentation.slides.length === 0
+    ) {
+      alert(
+        "This presentation has no slides."
+      );
+      return;
+    }
+
+    // Set current MongoDB presentation ID
+    setPresentationId(
+      presentation._id
+    );
+
+    // Load all slides
+    updateSlides(
+      presentation.slides
+    );
+
+    // Select first slide
+    const firstSlide =
+      presentation.slides[0];
+
+    updateActiveSlideId(
+      firstSlide.id
+    );
+
+    setSelectedObject(null);
+
+    // Load first slide into Fabric canvas
+    await editorCanvasRef.current
+      ?.loadCanvasJSON(
+        firstSlide.canvasJSON
+      );
+
+    alert(
+      "Presentation loaded successfully!"
+    );
+  } catch (error) {
+    console.error(
+      "Presentation load failed:",
+      error
+    );
+
+    alert(
+      "Failed to load presentation."
+    );
+  }
+};
+
+const handleExport = async (format) => {
+  if (!presentationId) {
+    alert("Please save the presentation first.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/presentations/${presentationId}/export/${format}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Export failed");
+    }
+
+    const blob = await response.blob();
+
+    const url =
+      window.URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+      `presentation.${format}`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(
+      "Export error:",
+      error
+    );
+
+    alert(
+      `Failed to export ${format.toUpperCase()}`
+    );
+  }
+};
+
   return (
     <div className="presentation-editor">
       <TopToolbar
@@ -410,7 +784,21 @@ const handleSendToBack = () => {
         onRedo={handleRedo}
         canUndo={historyState.canUndo}
         canRedo={historyState.canRedo}
+        onSave={handleSavePresentation}
       />
+    {activeTab === "File" ? (
+  <FileBackstage
+    onBack={() => setActiveTab("Home")}
+    onNew={handleNewPresentation}
+    onSave={handleSavePresentation}
+    onSaveAs={handleSaveAsPresentation}
+    onOpenPresentation={
+    handleOpenPresentation
+  }
+    onExport={handleExport}
+  />
+) : (
+  <>
       {activeTab === "Home" && (
   <HomeRibbon
     selectedObject={
@@ -425,6 +813,24 @@ const handleSendToBack = () => {
     onDuplicate={
       handleDuplicateObject
     }
+    onAlignLeft={
+  handleAlignLeft
+}
+onAlignCenter={
+  handleAlignCenter
+}
+onAlignRight={
+  handleAlignRight
+}
+onAlignTop={
+  handleAlignTop
+}
+onAlignMiddle={
+  handleAlignMiddle
+}
+onAlignBottom={
+  handleAlignBottom
+}
     onBringToFront={
       handleBringToFront
     }
@@ -436,6 +842,15 @@ const handleSendToBack = () => {
     }
     onSendToBack={
       handleSendToBack
+    }
+    onGroup={handleGroup}
+    onUngroup={handleUngroup}
+    
+    onDistributeHorizontal={
+    handleDistributeHorizontal
+    }
+    onDistributeVertical={
+      handleDistributeVertical
     }
   />
 )}
@@ -499,6 +914,8 @@ const handleSendToBack = () => {
           }
         />
       </main>
+        </>
+  )}
     </div>
   );
 }

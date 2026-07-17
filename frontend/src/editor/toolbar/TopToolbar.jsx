@@ -36,6 +36,7 @@ function TopToolbar({
         {tabs.map((tab) => (
           <button
             key={tab}
+            type="button"
             className={
               activeTab === tab
                 ? "toolbar-tab active"
@@ -52,6 +53,7 @@ function TopToolbar({
 
       <div className="toolbar-actions">
         <button
+          type="button"
           onClick={onUndo}
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
@@ -60,6 +62,7 @@ function TopToolbar({
         </button>
 
         <button
+          type="button"
           onClick={onRedo}
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
@@ -67,7 +70,10 @@ function TopToolbar({
           Redo
         </button>
 
-        <button className="present-button">
+        <button
+          type="button"
+          className="present-button"
+        >
           Present
         </button>
       </div>

@@ -13,6 +13,8 @@ import {
   Triangle,
   Line,
   FabricImage,
+  Group,
+  ActiveSelection,
 } from "fabric";
 
 import HistoryManager from "../history/HistoryManager";
@@ -27,6 +29,12 @@ const EditorCanvas = forwardRef(function EditorCanvas(
   const canvasElementRef = useRef(null);
 
   const fabricCanvasRef = useRef(null);
+
+  const zoomRef = useRef(1);
+
+  const guideLinesRef = useRef([]);
+
+  const SNAP_DISTANCE = 6;
 
   const selectionCallbackRef = useRef(
     onSelectionChange
@@ -93,7 +101,80 @@ const EditorCanvas = forwardRef(function EditorCanvas(
 };
 const sendSelectionData = (object) => {
   if (!object) {
-    selectionCallbackRef.current?.(null);
+    selectionCallbackRef.current?.(
+      null
+    );
+
+    return;
+  }
+
+  const isMultipleSelection =
+   String(object.type)
+    .toLowerCase() ===
+    "activeselection";
+
+  if (isMultipleSelection) {
+    const selectedObjects =
+      object.getObjects();
+
+    const objectData = {
+      type: "activeselection",
+
+      selectionType: "multiple",
+
+      selectedCount:
+        selectedObjects.length,
+
+      x: Math.round(
+        object.left ?? 0
+      ),
+
+      y: Math.round(
+        object.top ?? 0
+      ),
+
+      width: Math.round(
+        object.getScaledWidth()
+      ),
+
+      height: Math.round(
+        object.getScaledHeight()
+      ),
+
+      rotation: Math.round(
+        object.angle ?? 0
+      ),
+
+      fill: null,
+
+      stroke: null,
+
+      strokeWidth: null,
+
+      opacity: null,
+
+      fontSize: null,
+
+      fontFamily: null,
+
+      fontWeight: null,
+
+      fontStyle: null,
+
+      underline: null,
+
+      linethrough: null,
+
+      textAlign: null,
+
+      charSpacing: null,
+
+      lineHeight: null,
+    };
+
+    selectionCallbackRef.current?.(
+      objectData
+    );
 
     return;
   }
@@ -102,6 +183,10 @@ const sendSelectionData = (object) => {
     type:
       object.customType ||
       object.type,
+
+    selectionType: "single",
+
+    selectedCount: 1,
 
     x: Math.round(
       object.left ?? 0
@@ -192,13 +277,59 @@ const sendSelectionData = (object) => {
           )
         : null,
   };
-
   selectionCallbackRef.current?.(
     objectData
   );
 };
 
-  const notifyHistoryState = () => {
+const clearGuideLines = () => {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  guideLinesRef.current.forEach(
+    (line) => {
+      canvas.remove(line);
+    }
+  );
+
+  guideLinesRef.current = [];
+};
+
+const drawGuideLine = (
+  x1,
+  y1,
+  x2,
+  y2
+) => {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const line = new Line(
+    [x1, y1, x2, y2],
+    {
+      stroke: "#ff1493",
+      strokeWidth: 1,
+      selectable: false,
+      evented: false,
+      excludeFromExport: true,
+    }
+  );
+
+  guideLinesRef.current.push(line);
+
+  canvas.add(line);
+
+  canvas.sendObjectToBack(line);
+};
+
+const notifyHistoryState = () => {
+ 
     const history =
       historyManagerRef.current;
 
@@ -503,18 +634,22 @@ const duplicateActiveObject =
 
   useEffect(() => {
     const fabricCanvas = new Canvas(
-      canvasElementRef.current,
-      {
-        width: 960,
-        height: 540,
+  canvasElementRef.current,
+  {
+    width: 960,
+    height: 540,
 
-        backgroundColor: "#ffffff",
+    backgroundColor: "#ffffff",
 
-        selection: true,
+    selection: true,
 
-        preserveObjectStacking: true,
-      }
-    );
+    preserveObjectStacking: true,
+
+    selectionKey: "ctrlKey",
+
+    altSelectionKey: "altKey",
+  }
+);
 
     fabricCanvasRef.current =
       fabricCanvas;
@@ -551,10 +686,104 @@ const duplicateActiveObject =
       clearSelection
     );
 
-    fabricCanvas.on(
-      "object:moving",
-      updateSelection
-    );
+   fabricCanvas.on(
+  "object:moving",
+  (event) => {
+    const object = event.target;
+
+    if (!object) {
+      return;
+    }
+
+    clearGuideLines();
+
+    const GRID = 10;
+
+    object.set({
+      left:
+        Math.round(
+          object.left / GRID
+        ) * GRID,
+
+      top:
+        Math.round(
+          object.top / GRID
+        ) * GRID,
+    });
+
+    object.setCoords();
+
+    const canvasCenterX =
+      fabricCanvas.getWidth() / 2;
+
+    const canvasCenterY =
+      fabricCanvas.getHeight() / 2;
+
+    const bounds =
+      object.getBoundingRect();
+
+    const objectCenterX =
+      bounds.left +
+      bounds.width / 2;
+
+    const objectCenterY =
+      bounds.top +
+      bounds.height / 2;
+
+    if (
+      Math.abs(
+        objectCenterX -
+          canvasCenterX
+      ) < SNAP_DISTANCE
+    ) {
+      object.set({
+        left:
+          canvasCenterX -
+          bounds.width / 2,
+      });
+
+      drawGuideLine(
+        canvasCenterX,
+        0,
+        canvasCenterX,
+        fabricCanvas.getHeight()
+      );
+    }
+
+    if (
+      Math.abs(
+        objectCenterY -
+          canvasCenterY
+      ) < SNAP_DISTANCE
+    ) {
+      object.set({
+        top:
+          canvasCenterY -
+          bounds.height / 2,
+      });
+
+      drawGuideLine(
+        0,
+        canvasCenterY,
+        fabricCanvas.getWidth(),
+        canvasCenterY
+      );
+    }
+
+    object.setCoords();
+
+    updateSelection();
+
+    fabricCanvas.requestRenderAll();
+  }
+);
+
+fabricCanvas.on(
+  "mouse:up",
+  () => {
+    clearGuideLines();
+  }
+);
 
     fabricCanvas.on(
       "object:scaling",
@@ -1011,6 +1240,69 @@ if (
 
   return;
 }
+// CTRL + G
+
+if (
+  key === "g" &&
+  !event.shiftKey
+) {
+  event.preventDefault();
+
+  const activeObject =
+    canvas.getActiveObject();
+
+  if (
+    activeObject &&
+    activeObject.type ===
+      "activeSelection"
+  ) {
+    activeObject.toGroup();
+
+    canvas.requestRenderAll();
+
+    saveHistory();
+  }
+
+  return;
+}
+
+// CTRL + SHIFT + G
+
+if (
+  key === "g" &&
+  event.shiftKey
+) {
+  event.preventDefault();
+
+  const activeObject =
+    canvas.getActiveObject();
+
+  if (
+    activeObject &&
+   String(activeObject.type).toLowerCase() ===
+   "group"
+  ) {
+    const items = activeObject.removeAll();
+
+canvas.remove(activeObject);
+
+items.forEach((obj) => {
+    canvas.add(obj);
+});
+
+const selection = new ActiveSelection(items, {
+    canvas,
+});
+
+canvas.setActiveObject(selection);
+
+    canvas.requestRenderAll();
+
+    saveHistory();
+  }
+
+  return;
+}
 
   // CTRL + SHIFT + Z
 
@@ -1094,6 +1386,50 @@ if (
   useImperativeHandle(
     ref,
     () => ({
+      setZoom(value) {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  const zoom = Math.min(
+    4,
+    Math.max(0.25, value)
+  );
+
+  zoomRef.current = zoom;
+
+  canvas.setZoom(zoom);
+
+  canvas.requestRenderAll();
+},
+zoomIn() {
+  const current =
+    zoomRef.current;
+
+  this.setZoom(
+    current + 0.1
+  );
+},
+zoomOut() {
+  const current =
+    zoomRef.current;
+
+  this.setZoom(
+    current - 0.1
+  );
+},
+fitToScreen() {
+  const canvas =
+    fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  zoomRef.current = 1;
+
+  canvas.setZoom(1);
+
+  canvas.requestRenderAll();
+},
        getCanvasPreview() {
   const canvas =
     fabricCanvasRef.current;
@@ -1411,6 +1747,11 @@ if (
 
   const activeObject =
     canvas.getActiveObject();
+    const selectedObjects =
+  canvas.getActiveObjects();
+
+const isMultiple =
+  selectedObjects.length > 1;
 
   if (!activeObject) {
     return;
@@ -1419,31 +1760,71 @@ if (
   const numericValue =
     Number(value);
 
-  if (property === "x") {
-    if (
-      !Number.isFinite(numericValue)
-    ) {
-      return;
-    }
+if (property === "x") {
+
+  if (!Number.isFinite(numericValue)) {
+    return;
+  }
+
+  if (isMultiple) {
+
+    const delta =
+      numericValue -
+      Number(activeObject.left ?? 0);
+
+    selectedObjects.forEach((object) => {
+
+      object.set({
+        left:
+          Number(object.left ?? 0) + delta,
+      });
+
+      object.setCoords();
+
+    });
+
+  } else {
 
     activeObject.set(
       "left",
       numericValue
     );
+
   }
+}
+
+
 
   if (property === "y") {
-    if (
-      !Number.isFinite(numericValue)
-    ) {
-      return;
-    }
+
+
+  if (isMultiple) {
+
+    const delta =
+      numericValue -
+      Number(activeObject.top ?? 0);
+
+    selectedObjects.forEach((object) => {
+
+      object.set({
+        top:
+          Number(object.top ?? 0) + delta,
+      });
+
+      object.setCoords();
+
+    });
+
+  } else {
 
     activeObject.set(
       "top",
       numericValue
     );
+
   }
+
+}
 
   if (property === "width") {
     if (
@@ -1754,7 +2135,82 @@ if (
           URL.revokeObjectURL(imageUrl);
         }
       },
-      bringToFront() {
+   alignLeft() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject = canvas.getActiveObject();
+
+  if (!activeObject) {
+    return;
+  }
+
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  if (selectedObjects.length > 1) {
+    const leftPositions =
+      selectedObjects.map(
+        (object) =>
+          object.getBoundingRect().left
+      );
+
+    const targetLeft =
+      Math.min(...leftPositions);
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const difference =
+          targetLeft - bounds.left;
+
+        object.set({
+          left:
+            Number(object.left ?? 0) +
+            difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  const bounds =
+    activeObject.getBoundingRect();
+
+  activeObject.set({
+    left:
+      Number(activeObject.left ?? 0) -
+      bounds.left,
+  });
+
+  activeObject.setCoords();
+
+  canvas.requestRenderAll();
+
+  sendSelectionData(
+    activeObject
+  );
+
+  saveHistory();
+},
+
+alignCenter() {
   const canvas =
     fabricCanvasRef.current;
 
@@ -1769,76 +2225,557 @@ if (
     return;
   }
 
-  canvas.bringObjectToFront(
-    activeObject
-  );
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  if (selectedObjects.length > 1) {
+    const selectionBounds =
+      activeObject.getBoundingRect();
+
+    const targetCenter =
+      selectionBounds.left +
+      selectionBounds.width / 2;
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const objectCenter =
+          bounds.left +
+          bounds.width / 2;
+
+        const difference =
+          targetCenter -
+          objectCenter;
+
+        object.set({
+          left:
+            Number(
+              object.left ?? 0
+            ) + difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  const bounds =
+    activeObject.getBoundingRect();
+
+  const targetLeft =
+    (
+      canvas.getWidth() -
+      bounds.width
+    ) / 2;
+
+  const difference =
+    targetLeft - bounds.left;
+
+  activeObject.set({
+    left:
+      Number(
+        activeObject.left ?? 0
+      ) + difference,
+  });
+
+  activeObject.setCoords();
 
   canvas.requestRenderAll();
 
   sendSelectionData(
     activeObject
   );
+
+  saveHistory();
+},
+
+alignRight() {
+  const canvas =
+    fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject =
+    canvas.getActiveObject();
+
+  if (!activeObject) {
+    return;
+  }
+
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  if (selectedObjects.length > 1) {
+    const rightPositions =
+      selectedObjects.map(
+        (object) => {
+          const bounds =
+            object.getBoundingRect();
+
+          return (
+            bounds.left +
+            bounds.width
+          );
+        }
+      );
+
+    const targetRight = Math.max(
+      ...rightPositions
+    );
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const objectRight =
+          bounds.left +
+          bounds.width;
+
+        const difference =
+          targetRight -
+          objectRight;
+
+        object.set({
+          left:
+            Number(
+              object.left ?? 0
+            ) + difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  const bounds =
+    activeObject.getBoundingRect();
+
+  const targetLeft =
+    canvas.getWidth() -
+    bounds.width;
+
+  const difference =
+    targetLeft - bounds.left;
+
+  activeObject.set({
+    left:
+      Number(
+        activeObject.left ?? 0
+      ) + difference,
+  });
+
+  activeObject.setCoords();
+
+  canvas.requestRenderAll();
+
+  sendSelectionData(
+    activeObject
+  );
+
+  saveHistory();
+},
+
+alignTop() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject = canvas.getActiveObject();
+
+  if (!activeObject) {
+    return;
+  }
+
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  // Multiple Objects
+  if (selectedObjects.length > 1) {
+    const topPositions =
+      selectedObjects.map(
+        (object) =>
+          object.getBoundingRect().top
+      );
+
+    const targetTop =
+      Math.min(...topPositions);
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const difference =
+          targetTop - bounds.top;
+
+        object.set({
+          top:
+            Number(object.top ?? 0) +
+            difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  // Single Object
+  const bounds =
+    activeObject.getBoundingRect();
+
+  activeObject.set({
+    top:
+      Number(activeObject.top ?? 0) -
+      bounds.top,
+  });
+
+  activeObject.setCoords();
+
+  canvas.requestRenderAll();
+
+  sendSelectionData(
+    activeObject
+  );
+
+  saveHistory();
+},
+  
+alignMiddle() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject = canvas.getActiveObject();
+
+  if (!activeObject) {
+    return;
+  }
+
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  // Multiple Objects
+  if (selectedObjects.length > 1) {
+    const centers =
+      selectedObjects.map((object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        return (
+          bounds.top +
+          bounds.height / 2
+        );
+      });
+
+    const targetCenter =
+      centers.reduce(
+        (sum, value) => sum + value,
+        0
+      ) / centers.length;
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const currentCenter =
+          bounds.top +
+          bounds.height / 2;
+
+        const difference =
+          targetCenter -
+          currentCenter;
+
+        object.set({
+          top:
+            Number(object.top ?? 0) +
+            difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  // Single Object
+  const bounds =
+    activeObject.getBoundingRect();
+
+ const targetTop =
+(
+canvas.getHeight() -
+bounds.height
+) / 2;
+
+const difference =
+targetTop - bounds.top;
+
+
+
+activeObject.set({
+top:
+Number(activeObject.top ?? 0) +
+difference,
+});
+
+  activeObject.setCoords();
+
+  canvas.requestRenderAll();
+
+  sendSelectionData(
+    activeObject
+  );
+
+  saveHistory();
+},
+
+alignBottom() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject = canvas.getActiveObject();
+
+  if (!activeObject) {
+    return;
+  }
+
+  const selectedObjects =
+    canvas.getActiveObjects();
+
+  // Multiple Objects
+  if (selectedObjects.length > 1) {
+    const bottoms =
+      selectedObjects.map((object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        return (
+          bounds.top +
+          bounds.height
+        );
+      });
+
+    const targetBottom =
+      Math.max(...bottoms);
+
+    selectedObjects.forEach(
+      (object) => {
+        const bounds =
+          object.getBoundingRect();
+
+        const currentBottom =
+          bounds.top +
+          bounds.height;
+
+        const difference =
+          targetBottom -
+          currentBottom;
+
+        object.set({
+          top:
+            Number(object.top ?? 0) +
+            difference,
+        });
+
+        object.setCoords();
+      }
+    );
+
+    canvas.requestRenderAll();
+
+    sendSelectionData(
+      canvas.getActiveObject()
+    );
+
+    saveHistory();
+
+    return;
+  }
+
+  // Single Object
+  const bounds =
+    activeObject.getBoundingRect();
+
+ const targetTop =
+  canvas.getHeight() -
+  bounds.height;
+
+const difference =
+  targetTop - bounds.top;
+
+activeObject.set({
+  top:
+    Number(activeObject.top ?? 0) +
+    difference,
+});
+
+  activeObject.setCoords();
+
+  canvas.requestRenderAll();
+
+  sendSelectionData(
+    activeObject
+  );
+
+  saveHistory();
+},
+
+  
+    bringToFront() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  const objects = canvas.getActiveObjects();
+
+  if (!objects.length) return;
+
+  objects.forEach((obj) => {
+    canvas.remove(obj);
+    canvas.add(obj);
+  });
+
+  canvas.setActiveObject(
+    objects.length === 1
+      ? objects[0]
+      : new ActiveSelection(objects, { canvas })
+  );
+
+  canvas.requestRenderAll();
 
   saveHistory();
 },
 
 bringForward() {
-  const canvas =
-    fabricCanvasRef.current;
+  const canvas = fabricCanvasRef.current;
 
-  if (!canvas) {
-    return;
-  }
+  if (!canvas) return;
 
-  const activeObject =
-    canvas.getActiveObject();
+  const objects = canvas.getActiveObjects();
 
-  if (!activeObject) {
-    return;
-  }
+  if (!objects.length) return;
 
-  canvas.bringObjectForward(
-    activeObject
-  );
+  objects.forEach((obj) => {
+    const index = canvas.getObjects().indexOf(obj);
+
+    if (index < canvas.getObjects().length - 1) {
+      canvas.moveObjectTo(obj, index + 1);
+    }
+  });
 
   canvas.requestRenderAll();
-
-  sendSelectionData(
-    activeObject
-  );
 
   saveHistory();
 },
-
+  
 sendBackward() {
-  const canvas =
-    fabricCanvasRef.current;
+  const canvas = fabricCanvasRef.current;
 
-  if (!canvas) {
-    return;
-  }
+  if (!canvas) return;
 
-  const activeObject =
-    canvas.getActiveObject();
+  const objects = canvas.getActiveObjects();
 
-  if (!activeObject) {
-    return;
-  }
+  if (!objects.length) return;
 
-  canvas.sendObjectBackwards(
-    activeObject
-  );
+  objects.forEach((obj) => {
+    const index = canvas.getObjects().indexOf(obj);
+
+    if (index > 0) {
+      canvas.moveObjectTo(obj, index - 1);
+    }
+  });
 
   canvas.requestRenderAll();
-
-  sendSelectionData(
-    activeObject
-  );
 
   saveHistory();
 },
 
 sendToBack() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  const objects = canvas.getActiveObjects();
+
+  if (!objects.length) return;
+
+  // Selection remove करू नका
+  objects.forEach((obj) => {
+    canvas.remove(obj);
+  });
+
+  // उलट क्रमाने insert करा
+  [...objects].reverse().forEach((obj) => {
+    canvas.insertAt(0, obj);
+  });
+
+  if (objects.length === 1) {
+    canvas.setActiveObject(objects[0]);
+  } else {
+    canvas.setActiveObject(
+      new ActiveSelection(objects, { canvas })
+    );
+  }
+
+  canvas.requestRenderAll();
+
+  saveHistory();
+},
+
+groupSelected() {
+  console.log("Group Click");
   const canvas =
     fabricCanvasRef.current;
 
@@ -1849,19 +2786,222 @@ sendToBack() {
   const activeObject =
     canvas.getActiveObject();
 
-  if (!activeObject) {
+  if (
+    !activeObject ||
+    String(activeObject.type).toLowerCase() !==
+    "activeselection"
+){
+    return;
+}
+
+  const objects = activeObject.getObjects();
+
+canvas.discardActiveObject();
+
+objects.forEach((obj) => obj.group = undefined);
+const group = new Group(objects, {
+  left: activeObject.left,
+  top: activeObject.top,
+});
+
+objects.forEach((obj) => canvas.remove(obj));
+canvas.add(group);
+group.setCoords();
+
+canvas.setActiveObject(group);
+
+canvas.requestRenderAll();
+
+saveHistory();
+},
+
+ungroupSelected() {
+  const canvas =
+    fabricCanvasRef.current;
+
+  if (!canvas) {
     return;
   }
 
-  canvas.sendObjectToBack(
-    activeObject
-  );
+  const activeObject =
+    canvas.getActiveObject();
+
+  if (
+  !activeObject ||
+  String(activeObject.type).toLowerCase() !== "group"
+) {
+  return;
+}
+
+  const items = activeObject.removeAll();
+
+canvas.remove(activeObject);
+
+items.forEach((obj) => {
+    canvas.add(obj);
+});
+
+const selection = new ActiveSelection(items, {
+    canvas,
+});
+
+canvas.setActiveObject(selection);
 
   canvas.requestRenderAll();
 
-  sendSelectionData(
-    activeObject
-  );
+  saveHistory();
+},
+
+distributeHorizontal() {
+  const canvas =
+    fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  const objects =
+    canvas.getActiveObjects();
+
+  if (objects.length < 3) return;
+
+  const sorted =
+    [...objects].sort(
+      (a, b) => a.left - b.left
+    );
+
+  const first =
+    sorted[0];
+
+  const last =
+    sorted[
+      sorted.length - 1
+    ];
+
+  const firstRight =
+    first.left +
+    first.getScaledWidth();
+
+  const lastLeft =
+    last.left;
+
+  const totalWidth =
+    sorted
+      .slice(1, -1)
+      .reduce(
+        (sum, obj) =>
+          sum +
+          obj.getScaledWidth(),
+        0
+      );
+
+  const available =
+    lastLeft -
+    firstRight;
+
+  const gap =
+    (
+      available -
+      totalWidth
+    ) /
+    (sorted.length - 1);
+
+  let current =
+    firstRight + gap;
+
+  for (
+    let i = 1;
+    i < sorted.length - 1;
+    i++
+  ) {
+    sorted[i].set({
+      left: current,
+    });
+
+    sorted[i].setCoords();
+
+    current +=
+      sorted[
+        i
+      ].getScaledWidth() + gap;
+  }
+
+  canvas.requestRenderAll();
+
+  saveHistory();
+},
+
+distributeVertical() {
+  const canvas =
+    fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  const objects =
+    canvas.getActiveObjects();
+
+  if (objects.length < 3) return;
+
+  const sorted =
+    [...objects].sort(
+      (a, b) => a.top - b.top
+    );
+
+  const first =
+    sorted[0];
+
+  const last =
+    sorted[
+      sorted.length - 1
+    ];
+
+  const firstBottom =
+    first.top +
+    first.getScaledHeight();
+
+  const lastTop =
+    last.top;
+
+  const totalHeight =
+    sorted
+      .slice(1, -1)
+      .reduce(
+        (sum, obj) =>
+          sum +
+          obj.getScaledHeight(),
+        0
+      );
+
+  const available =
+    lastTop -
+    firstBottom;
+
+  const gap =
+    (
+      available -
+      totalHeight
+    ) /
+    (sorted.length - 1);
+
+  let current =
+    firstBottom + gap;
+
+  for (
+    let i = 1;
+    i < sorted.length - 1;
+    i++
+  ) {
+    sorted[i].set({
+      top: current,
+    });
+
+    sorted[i].setCoords();
+
+    current +=
+      sorted[
+        i
+      ].getScaledHeight() + gap;
+  }
+
+  canvas.requestRenderAll();
 
   saveHistory();
 },

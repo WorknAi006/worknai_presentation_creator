@@ -5,10 +5,20 @@ function HomeRibbon({
   onCut,
   onPaste,
   onDuplicate,
+  onAlignLeft,
+  onAlignCenter,
+  onAlignRight,
+  onAlignTop,
+  onAlignMiddle,
+  onAlignBottom,
   onBringToFront,
   onBringForward,
   onSendBackward,
   onSendToBack,
+  onGroup,
+  onUngroup,
+  onDistributeHorizontal,
+  onDistributeVertical,
 }) {
   const isText =
     selectedObject?.type === "textbox";
@@ -277,32 +287,95 @@ function HomeRibbon({
           }
         />
       </RibbonGroup>
+      <RibbonGroup title="Align">
+  <RibbonButton
+    label="Left"
+    disabled={!selectedObject}
+    onClick={onAlignLeft}
+  />
 
-      <RibbonGroup title="Arrange">
-        <RibbonButton
-          label="Bring Front"
-          disabled={!selectedObject}
-          onClick={onBringToFront}
-        />
+  <RibbonButton
+    label="Center"
+    disabled={!selectedObject}
+    onClick={onAlignCenter}
+  />
 
-        <RibbonButton
-          label="Forward"
-          disabled={!selectedObject}
-          onClick={onBringForward}
-        />
+  <RibbonButton
+    label="Right"
+    disabled={!selectedObject}
+    onClick={onAlignRight}
+  />
 
-        <RibbonButton
-          label="Backward"
-          disabled={!selectedObject}
-          onClick={onSendBackward}
-        />
+  <RibbonButton
+    label="Top"
+    disabled={!selectedObject}
+    onClick={onAlignTop}
+  />
 
-        <RibbonButton
-          label="Send Back"
-          disabled={!selectedObject}
-          onClick={onSendToBack}
-        />
-      </RibbonGroup>
+  <RibbonButton
+    label="Middle"
+    disabled={!selectedObject}
+    onClick={onAlignMiddle}
+  />
+
+  <RibbonButton
+    label="Bottom"
+    disabled={!selectedObject}
+    onClick={onAlignBottom}
+  />
+</RibbonGroup>
+
+<RibbonGroup title="Arrange">
+  <RibbonButton
+    label="Bring Front"
+    disabled={!selectedObject}
+    onClick={onBringToFront}
+  />
+
+  <RibbonButton
+    label="Forward"
+    disabled={!selectedObject}
+    onClick={onBringForward}
+  />
+
+  <RibbonButton
+    label="Backward"
+    disabled={!selectedObject}
+    onClick={onSendBackward}
+  />
+
+  <RibbonButton
+    label="Send Back"
+    disabled={!selectedObject}
+    onClick={onSendToBack}
+  />
+  <RibbonButton
+  label="Group"
+  disabled={!selectedObject}
+  onClick={onGroup}
+/>
+
+<RibbonButton
+  label="Ungroup"
+  disabled={!selectedObject}
+  onClick={onUngroup}
+/>
+</RibbonGroup>
+
+<RibbonGroup title="Distribute">
+  <RibbonButton
+    label="Horizontal"
+    disabled={!selectedObject}
+    onClick={onDistributeHorizontal}
+  />
+
+  <RibbonButton
+    label="Vertical"
+    disabled={!selectedObject}
+    onClick={onDistributeVertical}
+  />
+</RibbonGroup>
+        
     </div>
   );
 }

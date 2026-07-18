@@ -19,6 +19,7 @@ import {
 
 import HistoryManager from "../history/HistoryManager";
 
+import { themeDefinitions } from "../design/themeDefinitions";
 const EditorCanvas = forwardRef(function EditorCanvas(
   {
     onSelectionChange,
@@ -180,6 +181,8 @@ const sendSelectionData = (object) => {
   }
 
   const objectData = {
+    id: object.id || (object.id = `obj-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
+    animations: object.animations || [],
     type:
       object.customType ||
       object.type,
@@ -348,6 +351,8 @@ const notifyHistoryState = () => {
 
     const canvasJSON = canvas.toJSON([
       "customType",
+      "id",
+      "animations",
     ]);
 
     return JSON.stringify(canvasJSON);
@@ -400,6 +405,12 @@ const notifyHistoryState = () => {
       canvas.getObjects().forEach(
          (object) => {
             configureObjectControls(object);
+            if (!object.id) {
+              object.id = `obj-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            }
+            if (!object.animations) {
+              object.animations = [];
+            }
         }
      );
 
@@ -1383,6 +1394,59 @@ canvas.setActiveObject(selection);
     };
   }, []);
 
+  // =========================================
+// Apply PowerPoint Theme
+// =========================================
+const applyTheme = (themeId) => {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) return;
+
+  console.log("Theme:", themeId);
+
+  const theme = themeDefinitions.find(
+  (t) => t.id === themeId
+);
+
+if (!theme) return;
+
+
+ canvas.backgroundColor = theme.colors.bg;
+
+  canvas.getObjects().forEach((obj) => {
+
+    if (
+      obj.type === "textbox" ||
+      obj.type === "text" ||
+      obj.type === "i-text"
+    ) {
+      obj.set({
+        fill: theme.colors.text,
+      });
+    }
+
+    if (
+      obj.type === "rect" ||
+      obj.type === "circle" ||
+      obj.type === "triangle"
+    ) {
+      obj.set({
+        fill: theme.colors.primary,
+      });
+    }
+
+    if (obj.type === "line") {
+      obj.set({
+        stroke: theme.colors.primary,
+      });
+    }
+  });
+
+  canvas.requestRenderAll();
+
+  saveHistory();
+};
+
   useImperativeHandle(
     ref,
     () => ({
@@ -1465,6 +1529,8 @@ fitToScreen() {
 
         return canvas.toJSON([
           "customType",
+          "id",
+          "animations",
         ]);
       },
 
@@ -1496,6 +1562,12 @@ fitToScreen() {
           canvas.getObjects().forEach(
             (object) => {
                 configureObjectControls(object);
+                if (!object.id) {
+                  object.id = `obj-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                }
+                if (!object.animations) {
+                  object.animations = [];
+                }
             }
         );
 
@@ -1508,6 +1580,8 @@ fitToScreen() {
             JSON.stringify(
               canvas.toJSON([
                 "customType",
+                "id",
+                "animations",
               ])
             );
 
@@ -2056,6 +2130,10 @@ if (property === "x") {
       "lineHeight",
       numericValue
     );
+  }
+
+  if (property === "animations") {
+    activeObject.set("animations", value);
   }
 
   activeObject.setCoords();
@@ -3054,12 +3132,58 @@ duplicateSelected() {
         saveHistory();
       },
 
+      finishEditing() {
+  const canvas = fabricCanvasRef.current;
+
+  if (!canvas) {
+    return;
+  }
+
+  const activeObject =
+    canvas.getActiveObject();
+
+  if (
+    activeObject &&
+    activeObject.type === "textbox" &&
+    activeObject.isEditing
+  ) {
+    activeObject.exitEditing();
+
+    activeObject.setCoords();
+
+    canvas.requestRenderAll();
+
+    saveHistory();
+  }
+},
+
       undo() {
         undoHistory();
       },
 
       redo() {
         redoHistory();
+      },
+
+      applyTheme(themeId) {
+  applyTheme(themeId);
+},
+
+      getAnimatedObjectsCoords() {
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) return [];
+        return canvas.getObjects()
+          .filter(obj => obj.animations && obj.animations.length > 0)
+          .flatMap(obj => {
+            const sorted = [...obj.animations].sort((a, b) => (a.order || 0) - (b.order || 0));
+            const rect = obj.getBoundingRect(true);
+            return sorted.map((anim, idx) => ({
+              id: `${obj.id}-${anim.id}`,
+              order: anim.order,
+              left: rect.left + (idx * 20),
+              top: rect.top - 15,
+            }));
+          });
       },
     }),
     []

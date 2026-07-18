@@ -21,14 +21,20 @@ import PropertiesPanel from "../editor/properties/PropertiesPanel";
 import InsertRibbon from "../editor/ribbon/InsertRibbon";
 
 import HomeRibbon from "../editor/ribbon/HomeRibbon";
+import TransitionsRibbon from "../editor/ribbon/TransitionsRibbon";
 import {
   createBlankSlide,
   duplicateSlide,
 } from "../editor/slides/SlideManager";
+import DesignRibbon from "../editor/design/DesignRibbon";
 
 import "../styles/editor.css";
+import AnimationsRibbon from "../editor/animations/AnimationsRibbon";
+import "../editor/animations/animations.css";
 
 import FileBackstage from "../editor/file/FileBackstage";
+import SlideShowRibbon from "../editor/slideshow/SlideShowRibbon";
+import SlideShowPlayer from "../editor/slideshow/SlideShowPlayer";
 
 
 function PresentationEditor() {
@@ -83,6 +89,73 @@ function PresentationEditor() {
     canRedo: false,
   });
 
+  const [showAnimationPane, setShowAnimationPane] = useState(false);
+  const [animationPainterActive, setAnimationPainterActive] = useState(false);
+  const [animationPainterData, setAnimationPainterData] = useState(null);
+  const [selectedAnimationIndex, setSelectedAnimationIndex] = useState(0);
+  const [animatedObjectsCoords, setAnimatedObjectsCoords] = useState([]);
+  // ==============================
+// Slide Show
+// ==============================
+
+const [showSlideShow, setShowSlideShow] =
+  useState(false);
+
+  // =============================
+// DESIGN TAB STATE
+// =============================
+
+// Selected Theme
+const [selectedThemeId, setSelectedThemeId] =
+useState("office");
+// ================================
+// Apply Design Theme
+// ================================
+const handleThemeChange = (themeId) => {
+  // Update selected theme in ribbon
+  setSelectedThemeId(themeId);
+
+  // Apply theme to Fabric Canvas
+  editorCanvasRef.current?.applyTheme(themeId);
+};
+
+// Selected Variant
+const [
+selectedVariantIndex,
+setSelectedVariantIndex,
+] = useState(0);
+
+// Slide Size
+const [
+slideSize,
+setSlideSize,
+] =
+useState("16:9");
+
+// Background Sidebar
+const [
+showFormatBackground,
+setShowFormatBackground,
+] =
+useState(false);
+
+  const updateBadges = useCallback(() => {
+    if (editorCanvasRef.current?.getAnimatedObjectsCoords) {
+      const coords = editorCanvasRef.current.getAnimatedObjectsCoords();
+      setAnimatedObjectsCoords(coords);
+    }
+  }, []);
+
+  const handlePreviewAnimations = () => {
+    console.log("Preview animations clicked");
+  };
+
+ const handleStartSlideShow = () => {
+
+    setShowSlideShow(true);
+
+};
+
   const updateSlides = useCallback(
     (nextSlides) => {
       slidesRef.current = nextSlides;
@@ -102,13 +175,31 @@ function PresentationEditor() {
 
   const handleSelectionChange =
     useCallback((objectData) => {
+      if (animationPainterActive && animationPainterData && objectData) {
+        const copiedAnims = animationPainterData.map(anim => ({
+          ...anim,
+          id: `anim-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+        }));
+        
+        editorCanvasRef.current?.updateSelectedObject("animations", copiedAnims);
+        setAnimationPainterActive(false);
+        setAnimationPainterData(null);
+        setSelectedObject({
+          ...objectData,
+          animations: copiedAnims
+        });
+        setTimeout(updateBadges, 50);
+        return;
+      }
       setSelectedObject(objectData);
-    }, []);
+      setTimeout(updateBadges, 50);
+    }, [animationPainterActive, animationPainterData, updateBadges]);
 
   const handleHistoryChange =
     useCallback((newHistoryState) => {
       setHistoryState(newHistoryState);
-    }, []);
+      setTimeout(updateBadges, 50);
+    }, [updateBadges]);
 
   const getCurrentCanvasJSON =
     useCallback(() => {
@@ -128,6 +219,7 @@ function PresentationEditor() {
 
   const saveCurrentSlide =
     useCallback(() => {
+      editorCanvasRef.current?.finishEditing?.();
       const canvasJSON =
         getCurrentCanvasJSON();
 
@@ -321,6 +413,8 @@ const handleDistributeVertical =
       ?.loadCanvasJSON(
         nextSlide.canvasJSON
       );
+
+    setTimeout(updateBadges, 100);
   };
 
   const handleAddSlide = async () => {
@@ -868,10 +962,111 @@ onAlignBottom={
         />
       )}
 
+      {activeTab === "Transitions" && (
+        <TransitionsRibbon
+          activeSlide={slides.find((s) => s.id === activeSlideId)}
+          onUpdateSlideTransition={(transitionData) => {
+            const updated = slides.map((s) =>
+              s.id === activeSlideId ? { ...s, transition: transitionData } : s
+            );
+            updateSlides(updated);
+          }}
+          onUpdateSlideAdvance={(advanceData) => {
+            const updated = slides.map((s) =>
+              s.id === activeSlideId ? { ...s, advance: advanceData } : s
+            );
+            updateSlides(updated);
+          }}
+          onApplyToAll={() => {
+            const currentSlide = slides.find((s) => s.id === activeSlideId);
+            const currentTransition = currentSlide?.transition || {
+              type: "none",
+              duration: 0.70,
+              direction: null,
+            };
+            const currentAdvance = currentSlide?.advance || {
+              onClick: true,
+              after: null,
+            };
+            const updated = slides.map((s) => ({
+              ...s,
+              transition: { ...currentTransition },
+              advance: { ...currentAdvance },
+            }));
+            updateSlides(updated);
+            alert("Applied transition settings to all slides.");
+          }}
+          onPreviewTransition={() => {
+            console.log("Preview transition clicked");
+          }}
+        />
+      )}
+
+      {activeTab === "Design" && (
+
+<DesignRibbon
+
+selectedThemeId={selectedThemeId}
+
+selectedVariantIndex={selectedVariantIndex}
+
+slideSize={slideSize}
+
+formatBackgroundOpen={showFormatBackground}
+
+onSelectTheme={handleThemeChange}
+
+onSelectVariant={setSelectedVariantIndex}
+
+onSelectSlideSize={setSlideSize}
+
+onToggleFormatBackground={()=>
+
+setShowFormatBackground(
+
+!showFormatBackground
+
+)}
+
+ />
+
+)}
+
+      {activeTab === "Animations" && (
+        <AnimationsRibbon
+          selectedObject={selectedObject}
+          onUpdateObject={handleUpdateObject}
+          onPreviewAnimations={handlePreviewAnimations}
+          showAnimationPane={showAnimationPane}
+          setShowAnimationPane={setShowAnimationPane}
+          animationPainterActive={animationPainterActive}
+          setAnimationPainterActive={(val) => {
+            setAnimationPainterActive(val);
+            if (val && selectedObject && selectedObject.animations) {
+              setAnimationPainterData(selectedObject.animations);
+            } else {
+              setAnimationPainterData(null);
+            }
+          }}
+          selectedAnimationIndex={selectedAnimationIndex}
+          setSelectedAnimationIndex={setSelectedAnimationIndex}
+        />
+      )}
+
+
+{activeTab === "Slide Show" && (
+  <SlideShowRibbon
+    onFromBeginning={handleStartSlideShow}
+  />
+)}
       <main
         className={
         activeTab === "Insert" ||
-        activeTab === "Home"
+        activeTab === "Home" ||
+        activeTab === "Transitions" ||
+        activeTab === "Animations" ||
+        activeTab === "Design"
+        
             ? "editor-layout ribbon-open"
             : "editor-layout"
   }
@@ -893,7 +1088,7 @@ onAlignBottom={
           }
         />
 
-        <section className="editor-workspace">
+        <section className="editor-workspace" style={{ position: "relative" }}>
           <EditorCanvas
             ref={editorCanvasRef}
             onSelectionChange={
@@ -903,6 +1098,19 @@ onAlignBottom={
               handleHistoryChange
             }
           />
+          {activeTab !== "Present" && animatedObjectsCoords.map(badge => (
+            <div
+              key={badge.id}
+              className="animation-badge"
+              style={{
+                left: `${badge.left}px`,
+                top: `${badge.top}px`,
+                position: "absolute",
+              }}
+            >
+              {badge.order}
+            </div>
+          ))}
         </section>
 
         <PropertiesPanel
@@ -916,6 +1124,17 @@ onAlignBottom={
       </main>
         </>
   )}
+  {showSlideShow && (
+ <SlideShowPlayer
+  onClose={() =>
+    setShowSlideShow(false)
+  }
+
+  slides={slides}
+
+  activeSlideId={activeSlideId}
+/>
+)}
     </div>
   );
 }

@@ -1,0 +1,568 @@
+/* Ribbon and UI Specific Styles for Transitions */
+
+.transitions-ribbon {
+  display: flex;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  height: 94px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gallery-group {
+  flex: 1 1 auto;
+}
+
+.transitions-gallery {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+.transitions-gallery-container {
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+.transition-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 52px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.transition-item-btn:hover {
+  background: #f3f4f6;
+  border-color: #cbd5e1;
+}
+
+.transition-item-btn.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.transition-item-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.transition-item-name {
+  font-size: 9px;
+  color: #4b5563;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.transitions-more-btn {
+  height: 52px;
+  width: 24px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: #4b5563;
+}
+
+.transitions-more-btn:hover {
+  background: #e5e7eb;
+}
+
+/* More Transitions Dropdown Modal/Popout */
+.transitions-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.transitions-dropdown-menu {
+  position: absolute;
+  top: 104px;
+  left: 100px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  padding: 12px;
+  width: 460px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.transitions-dropdown-category {
+  margin-bottom: 12px;
+}
+
+.transitions-dropdown-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.transitions-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+/* Controls inside ribbon groups */
+.transitions-control-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.transitions-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #374151;
+}
+
+.transitions-input-num {
+  width: 64px;
+  padding: 2px 4px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  text-align: right;
+}
+
+.transitions-select {
+  padding: 2px 4px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 100px;
+}
+
+.transitions-btn-flat {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.transitions-btn-flat:hover {
+  background: #e5e7eb;
+}
+
+.transitions-advance-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Slideshow overlay styles */
+.slideshow-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.slideshow-slide-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: black;
+}
+
+.slideshow-canvas-container {
+  width: 1333px;
+  height: 750px;
+  position: relative;
+  background: white;
+  transform-origin: center center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+
+.slideshow-slide-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* CSS TRANSITIONS FOR SLIDESHOW / PREVIEW */
+
+.transition-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.transition-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Animations declarations */
+
+/* 1. Fade */
+.t-fade-enter {
+  opacity: 0;
+  z-index: 2;
+}
+.t-fade-enter-active {
+  opacity: 1;
+  transition: opacity linear;
+}
+
+/* 2. Push */
+/* Push Left (incoming moves from right to left, outgoing moves to left) */
+.t-push-left-enter {
+  transform: translate3d(100%, 0, 0);
+  z-index: 2;
+}
+.t-push-left-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform ease-in-out;
+}
+.t-push-left-exit {
+  transform: translate3d(0, 0, 0);
+}
+.t-push-left-exit-active {
+  transform: translate3d(-100%, 0, 0);
+  transition: transform ease-in-out;
+}
+
+/* Push Right */
+.t-push-right-enter {
+  transform: translate3d(-100%, 0, 0);
+  z-index: 2;
+}
+.t-push-right-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform ease-in-out;
+}
+.t-push-right-exit {
+  transform: translate3d(0, 0, 0);
+}
+.t-push-right-exit-active {
+  transform: translate3d(100%, 0, 0);
+  transition: transform ease-in-out;
+}
+
+/* Push Top (incoming moves from bottom to top) */
+.t-push-top-enter {
+  transform: translate3d(0, 100%, 0);
+  z-index: 2;
+}
+.t-push-top-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform ease-in-out;
+}
+.t-push-top-exit {
+  transform: translate3d(0, 0, 0);
+}
+.t-push-top-exit-active {
+  transform: translate3d(0, -100%, 0);
+  transition: transform ease-in-out;
+}
+
+/* Push Bottom */
+.t-push-bottom-enter {
+  transform: translate3d(0, -100%, 0);
+  z-index: 2;
+}
+.t-push-bottom-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform ease-in-out;
+}
+.t-push-bottom-exit {
+  transform: translate3d(0, 0, 0);
+}
+.t-push-bottom-exit-active {
+  transform: translate3d(0, 100%, 0);
+  transition: transform ease-in-out;
+}
+
+/* 3. Wipe */
+/* Wipe Left */
+.t-wipe-left-enter {
+  clip-path: inset(0 0 0 100%);
+  z-index: 2;
+}
+.t-wipe-left-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path ease-in-out;
+}
+
+/* Wipe Right */
+.t-wipe-right-enter {
+  clip-path: inset(0 100% 0 0);
+  z-index: 2;
+}
+.t-wipe-right-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path ease-in-out;
+}
+
+/* Wipe Top */
+.t-wipe-top-enter {
+  clip-path: inset(100% 0 0 0);
+  z-index: 2;
+}
+.t-wipe-top-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path ease-in-out;
+}
+
+/* Wipe Bottom */
+.t-wipe-bottom-enter {
+  clip-path: inset(0 0 100% 0);
+  z-index: 2;
+}
+.t-wipe-bottom-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path ease-in-out;
+}
+
+/* 4. Split */
+/* Vertical In */
+.t-split-vertical-in-enter {
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0, 0 100%, 100% 100%, 100% 100%, 0 100%);
+  z-index: 2;
+}
+.t-split-vertical-in-enter-active {
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 50%, 100% 50%, 100% 100%, 0 100%);
+  transition: clip-path ease-in-out;
+}
+
+/* Vertical Out */
+.t-split-vertical-out-enter {
+  clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%, 0 50%, 100% 50%, 100% 50%, 0 50%);
+  z-index: 2;
+}
+.t-split-vertical-out-enter-active {
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 50%, 100% 50%, 100% 100%, 0 100%);
+  transition: clip-path ease-in-out;
+}
+
+/* Horizontal In */
+.t-split-horizontal-in-enter {
+  clip-path: polygon(0 0, 0 100%, 0 100%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 0);
+  z-index: 2;
+}
+.t-split-horizontal-in-enter-active {
+  clip-path: polygon(0 0, 0 100%, 50% 100%, 50% 0, 50% 0, 50% 100%, 100% 100%, 100% 0);
+  transition: clip-path ease-in-out;
+}
+
+/* Horizontal Out */
+.t-split-horizontal-out-enter {
+  clip-path: polygon(50% 0, 50% 100%, 50% 100%, 50% 0, 50% 0, 50% 100%, 50% 100%, 50% 0);
+  z-index: 2;
+}
+.t-split-horizontal-out-enter-active {
+  clip-path: polygon(0 0, 0 100%, 50% 100%, 50% 0, 50% 0, 50% 100%, 100% 100%, 100% 0);
+  transition: clip-path ease-in-out;
+}
+
+/* 5. Reveal */
+.t-reveal-enter {
+  transform: translate3d(0, 0, -200px);
+  opacity: 0;
+  z-index: 2;
+}
+.t-reveal-enter-active {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition: transform ease-out, opacity ease-out;
+}
+.t-reveal-exit {
+  transform: translate3d(0, 0, 0);
+}
+.t-reveal-exit-active {
+  transform: translate3d(-100%, 0, 0);
+  transition: transform ease-in-out;
+}
+
+/* 6. Cut */
+.t-cut-enter {
+  opacity: 0;
+  z-index: 2;
+}
+.t-cut-enter-active {
+  opacity: 1;
+}
+
+/* 7. Cover */
+.t-cover-enter {
+  transform: translate3d(100%, 0, 0);
+  z-index: 2;
+}
+.t-cover-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform ease-in-out;
+}
+
+/* 8. Uncover */
+.t-uncover-enter {
+  z-index: 1;
+}
+.t-uncover-exit {
+  transform: translate3d(0, 0, 0);
+  z-index: 2;
+}
+.t-uncover-exit-active {
+  transform: translate3d(-100%, 0, 0);
+  transition: transform ease-in-out;
+}
+
+/* 9. Zoom */
+.t-zoom-enter {
+  transform: scale3d(0, 0, 0);
+  opacity: 0;
+  z-index: 2;
+}
+.t-zoom-enter-active {
+  transform: scale3d(1, 1, 1);
+  opacity: 1;
+  transition: transform ease-in-out, opacity ease-in-out;
+}
+
+/* 10. Flip */
+.t-flip-enter {
+  transform: rotateY(-180deg);
+  z-index: 2;
+}
+.t-flip-enter-active {
+  transform: rotateY(0deg);
+  transition: transform ease-in-out;
+}
+.t-flip-exit {
+  transform: rotateY(0deg);
+}
+.t-flip-exit-active {
+  transform: rotateY(180deg);
+  transition: transform ease-in-out;
+}
+
+/* 11. Cube */
+.t-cube-enter {
+  transform: rotateY(90deg) translate3d(0, 0, 666px);
+  opacity: 0.5;
+  z-index: 2;
+}
+.t-cube-enter-active {
+  transform: rotateY(0deg) translate3d(0, 0, 0);
+  opacity: 1;
+  transition: transform ease-in-out, opacity ease-in-out;
+}
+.t-cube-exit {
+  transform: rotateY(0deg) translate3d(0, 0, 0);
+}
+.t-cube-exit-active {
+  transform: rotateY(-90deg) translate3d(0, 0, 666px);
+  opacity: 0.5;
+  transition: transform ease-in-out, opacity ease-in-out;
+}
+
+/* 12. Doors */
+.t-doors-enter {
+  transform: scale3d(0.8, 0.8, 0.8);
+  opacity: 0;
+  z-index: 2;
+}
+.t-doors-enter-active {
+  transform: scale3d(1, 1, 1);
+  opacity: 1;
+  transition: transform ease-in-out, opacity ease-in-out;
+}
+.t-doors-exit {
+  transform: scale3d(1, 1, 1);
+}
+.t-doors-exit-active {
+  transform: scale3d(1.2, 1.2, 1.2);
+  opacity: 0;
+  transition: transform ease-in-out, opacity ease-in-out;
+}
+
+/* Canvas Transition Preview Wrapper Overlay */
+.transition-preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background: white;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.transition-preview-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: white;
+}

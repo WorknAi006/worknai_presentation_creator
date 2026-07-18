@@ -7,9 +7,6 @@ const tabs = [
   "Transitions",
   "Animations",
   "Slide Show",
-  "Record",
-  "Review",
-  "View",
 ];
 
 function TopToolbar({

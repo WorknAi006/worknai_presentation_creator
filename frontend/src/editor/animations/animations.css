@@ -1,0 +1,532 @@
+/* PowerPoint-like Animations CSS */
+
+/* ==========================================
+   ENTRANCE ANIMATIONS KEYFRAMES & CLASSES
+   ========================================== */
+
+/* 1. Fade In */
+@keyframes a-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.a-fade {
+  animation-name: a-fade-in;
+  animation-fill-mode: both;
+}
+
+/* 2. Fly In */
+@keyframes a-fly-in-left {
+  from { transform: translate3d(-100vw, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-right {
+  from { transform: translate3d(100vw, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-top {
+  from { transform: translate3d(0, -100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-bottom {
+  from { transform: translate3d(0, 100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-top-left {
+  from { transform: translate3d(-100vw, -100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-top-right {
+  from { transform: translate3d(100vw, -100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-bottom-left {
+  from { transform: translate3d(-100vw, 100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes a-fly-in-bottom-right {
+  from { transform: translate3d(100vw, 100vh, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+.a-fly-in-from-left { animation-name: a-fly-in-left; animation-fill-mode: both; }
+.a-fly-in-from-right { animation-name: a-fly-in-right; animation-fill-mode: both; }
+.a-fly-in-from-top { animation-name: a-fly-in-top; animation-fill-mode: both; }
+.a-fly-in-from-bottom { animation-name: a-fly-in-bottom; animation-fill-mode: both; }
+.a-fly-in-from-top-left { animation-name: a-fly-in-top-left; animation-fill-mode: both; }
+.a-fly-in-from-top-right { animation-name: a-fly-in-top-right; animation-fill-mode: both; }
+.a-fly-in-from-bottom-left { animation-name: a-fly-in-bottom-left; animation-fill-mode: both; }
+.a-fly-in-from-bottom-right { animation-name: a-fly-in-bottom-right; animation-fill-mode: both; }
+
+/* 3. Float In */
+@keyframes a-float-in-up {
+  from { opacity: 0; transform: translate3d(0, 100px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes a-float-in-down {
+  from { opacity: 0; transform: translate3d(0, -100px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.a-float-in-float-up { animation-name: a-float-in-up; animation-fill-mode: both; }
+.a-float-in-float-down { animation-name: a-float-in-down; animation-fill-mode: both; }
+
+/* 4. Split In */
+@keyframes a-split-horiz-in {
+  from { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0, 0 100%, 100% 100%, 100% 100%, 0 100%); }
+  to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%, 100% 100%, 100% 100%, 0 100%); }
+}
+@keyframes a-split-horiz-out {
+  from { clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%, 0 50%, 100% 50%, 100% 50%, 0 50%); }
+  to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%, 100% 100%, 100% 100%, 0 100%); }
+}
+.a-split-horizontal-in { animation-name: a-split-horiz-in; animation-fill-mode: both; }
+.a-split-horizontal-out { animation-name: a-split-horiz-out; animation-fill-mode: both; }
+.a-split-vertical-in { animation-name: a-split-horiz-in; animation-fill-mode: both; } /* Simplified fallback */
+.a-split-vertical-out { animation-name: a-split-horiz-out; animation-fill-mode: both; }
+
+/* 5. Wipe In */
+@keyframes a-wipe-left {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes a-wipe-right {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes a-wipe-top {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes a-wipe-bottom {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.a-wipe-from-left { animation-name: a-wipe-left; animation-fill-mode: both; }
+.a-wipe-from-right { animation-name: a-wipe-right; animation-fill-mode: both; }
+.a-wipe-from-top { animation-name: a-wipe-top; animation-fill-mode: both; }
+.a-wipe-from-bottom { animation-name: a-wipe-bottom; animation-fill-mode: both; }
+
+/* 6. Shape In */
+@keyframes a-shape-circle {
+  from { clip-path: circle(0% at 50% 50%); }
+  to { clip-path: circle(150% at 50% 50%); }
+}
+@keyframes a-shape-box {
+  from { clip-path: inset(50% 50% 50% 50%); }
+  to { clip-path: inset(0% 0% 0% 0%); }
+}
+.a-shape-circle { animation-name: a-shape-circle; animation-fill-mode: both; }
+.a-shape-box { animation-name: a-shape-box; animation-fill-mode: both; }
+.a-shape-diamond { animation-name: a-shape-circle; animation-fill-mode: both; }
+.a-shape-plus { animation-name: a-shape-box; animation-fill-mode: both; }
+
+/* 7. Zoom In */
+@keyframes a-zoom-in {
+  from { opacity: 0; transform: scale3d(0, 0, 0); }
+  to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+@keyframes a-zoom-out-entrance {
+  from { opacity: 0; transform: scale3d(2, 2, 2); }
+  to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+.a-zoom-in { animation-name: a-zoom-in; animation-fill-mode: both; }
+.a-zoom-out { animation-name: a-zoom-out-entrance; animation-fill-mode: both; }
+
+/* 8. Bounce In */
+@keyframes a-bounce-in {
+  from, 20%, 40%, 60%, 80%, to { animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+  0% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+  20% { transform: scale3d(1.1, 1.1, 1.1); }
+  40% { transform: scale3d(0.9, 0.9, 0.9); }
+  60% { opacity: 1; transform: scale3d(1.03, 1.03, 1.03); }
+  80% { transform: scale3d(0.97, 0.97, 0.97); }
+  to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+.a-bounce { animation-name: a-bounce-in; animation-fill-mode: both; }
+
+/* 9. Swivel In */
+@keyframes a-swivel-in {
+  from { opacity: 0; transform: perspective(400px) rotate3d(0, 1, 0, 90deg); }
+  to { opacity: 1; transform: perspective(400px) rotate3d(0, 1, 0, 0deg); }
+}
+.a-swivel { animation-name: a-swivel-in; animation-fill-mode: both; }
+
+/* 10. Grow & Turn */
+@keyframes a-grow-turn {
+  from { opacity: 0; transform: scale(0) rotate(-180deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+.a-grow-turn { animation-name: a-grow-turn; animation-fill-mode: both; }
+
+
+/* ==========================================
+   EMPHASIS ANIMATIONS KEYFRAMES & CLASSES
+   ========================================== */
+
+/* 1. Pulse */
+@keyframes a-pulse {
+  from { transform: scale3d(1, 1, 1); }
+  50% { transform: scale3d(1.1, 1.1, 1.1); }
+  to { transform: scale3d(1, 1, 1); }
+}
+.a-pulse { animation-name: a-pulse; }
+
+/* 2. Spin */
+@keyframes a-spin-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes a-spin-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+.a-spin-clockwise { animation-name: a-spin-cw; }
+.a-spin-counterclockwise { animation-name: a-spin-ccw; }
+
+/* 3. Grow/Shrink */
+@keyframes a-grow {
+  from { transform: scale3d(1, 1, 1); }
+  to { transform: scale3d(1.5, 1.5, 1.5); }
+}
+@keyframes a-shrink {
+  from { transform: scale3d(1, 1, 1); }
+  to { transform: scale3d(0.5, 0.5, 0.5); }
+}
+.a-grow-shrink-grow { animation-name: a-grow; animation-fill-mode: forwards; }
+.a-grow-shrink-shrink { animation-name: a-shrink; animation-fill-mode: forwards; }
+
+/* 4. Teeter */
+@keyframes a-teeter {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+.a-teeter { animation-name: a-teeter; }
+
+/* 5. Color Pulse */
+@keyframes a-color-pulse {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(180deg); }
+}
+.a-color-pulse { animation-name: a-color-pulse; }
+
+
+/* ==========================================
+   EXIT ANIMATIONS KEYFRAMES & CLASSES
+   ========================================== */
+
+/* 1. Fade Out */
+@keyframes a-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.a-fade-out { animation-name: a-fade-out; animation-fill-mode: both; }
+
+/* 2. Fly Out */
+@keyframes a-fly-out-left {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-100vw, 0, 0); }
+}
+@keyframes a-fly-out-right {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(100vw, 0, 0); }
+}
+@keyframes a-fly-out-top {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -100vh, 0); }
+}
+@keyframes a-fly-out-bottom {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 100vh, 0); }
+}
+.a-fly-out-to-left { animation-name: a-fly-out-left; animation-fill-mode: both; }
+.a-fly-out-to-right { animation-name: a-fly-out-right; animation-fill-mode: both; }
+.a-fly-out-to-top { animation-name: a-fly-out-top; animation-fill-mode: both; }
+.a-fly-out-to-bottom { animation-name: a-fly-out-bottom; animation-fill-mode: both; }
+
+
+/* ==========================================
+   RIBBON TOOLBAR SPECIFIC STYLES
+   ========================================== */
+
+.animations-ribbon {
+  display: flex;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  height: 94px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.animations-gallery {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+.animations-gallery-container {
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+.animation-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 52px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.animation-item-btn:hover {
+  background: #f3f4f6;
+  border-color: #cbd5e1;
+}
+
+.animation-item-btn.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.animation-item-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.animation-item-name {
+  font-size: 9px;
+  color: #4b5563;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.animations-more-btn {
+  height: 52px;
+  width: 24px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: #4b5563;
+}
+
+.animations-more-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Animations Gallery Overlay Dropdown */
+.animations-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background: transparent;
+}
+
+.animations-dropdown-menu {
+  position: absolute;
+  top: 130px; /* Positions below the ribbon */
+  left: 100px;
+  right: 100px;
+  max-height: 70vh;
+  background: white;
+  border: 1px solid #c8c8c8;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  z-index: 1001;
+  overflow-y: auto;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.animations-dropdown-category {
+  margin-bottom: 16px;
+}
+
+.animations-dropdown-title {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #555;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.animations-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+/* Color Coding for Categories */
+.category-entrance .animation-item-icon { color: #2e7d32; } /* Green */
+.category-emphasis .animation-item-icon { color: #ef6c00; } /* Orange */
+.category-exit .animation-item-icon { color: #c62828; } /* Red */
+.category-motion_path .animation-item-icon { color: #1565c0; } /* Blue */
+
+/* Timing Control Rows */
+.animations-control-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.animations-control-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #374151;
+}
+
+.animations-select {
+  padding: 2px 4px;
+  font-size: 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  background: white;
+  height: 22px;
+  min-width: 100px;
+}
+
+.animations-input-num {
+  padding: 2px 4px;
+  font-size: 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  width: 50px;
+  height: 22px;
+  box-sizing: border-box;
+}
+
+.animations-btn-flat {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.animations-btn-flat:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* Ribbon Button Groups */
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid #e5e7eb;
+  padding: 0 8px;
+  min-width: 70px;
+  height: 100%;
+}
+
+.ribbon-group:last-child {
+  border-right: none;
+}
+
+.ribbon-group-content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+}
+
+.ribbon-group-label {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  text-align: center;
+  user-select: none;
+}
+
+.ribbon-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  min-width: 48px;
+  height: 52px;
+  transition: all 0.2s ease;
+}
+
+.ribbon-button:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.ribbon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ribbon-button-icon {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.ribbon-button-label {
+  font-size: 10px;
+  color: #4b5563;
+  margin-top: 2px;
+}
+
+/* Animation Pane and Badges styling */
+.animation-badge {
+  position: absolute;
+  background: #ffc107;
+  color: black;
+  font-weight: bold;
+  border: 1px solid #b78a00;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  z-index: 100;
+  pointer-events: none;
+}

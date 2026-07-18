@@ -140,18 +140,12 @@ Open
 >
   Export
 </button>
-          <button type="button">
-            Close
-          </button>
+        
         </nav>
 
         <div className="file-backstage-bottom">
           <button type="button">
             Account
-          </button>
-
-          <button type="button">
-            Options
           </button>
         </div>
       </aside>

@@ -15,6 +15,9 @@ import {
   FabricImage,
   Group,
   ActiveSelection,
+  Polygon,
+  Ellipse,
+  Path,
 } from "fabric";
 
 import HistoryManager from "../history/HistoryManager";
@@ -1531,6 +1534,7 @@ fitToScreen() {
           "customType",
           "id",
           "animations",
+          "srcUrl",
         ]);
       },
 
@@ -1704,96 +1708,97 @@ fitToScreen() {
       },
 
       addShape(shapeType) {
-        const canvas =
-          fabricCanvasRef.current;
-
-        if (!canvas) {
-          return;
-        }
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) return;
 
         let shape = null;
+        const defaultFill = "#2563eb"; // Blueish
+        const defaultStroke = "#111827";
 
-        if (
-          shapeType === "rectangle"
-        ) {
-          shape = new Rect({
-            left: 150,
-
-            top: 150,
-
-            width: 220,
-
-            height: 140,
-
-            fill: "#2563eb",
-
-            rx: 8,
-
-            ry: 8,
-          });
+        switch (shapeType) {
+          case "rectangle":
+            shape = new Rect({ left: 150, top: 150, width: 220, height: 140, fill: defaultFill });
+            break;
+          case "rounded_rectangle":
+            shape = new Rect({ left: 150, top: 150, width: 220, height: 140, fill: defaultFill, rx: 16, ry: 16 });
+            break;
+          case "circle":
+            shape = new Circle({ left: 150, top: 150, radius: 80, fill: "#7c3aed" });
+            break;
+          case "ellipse":
+            shape = new Ellipse({ left: 150, top: 150, rx: 100, ry: 60, fill: defaultFill });
+            break;
+          case "triangle":
+            shape = new Triangle({ left: 150, top: 150, width: 180, height: 160, fill: "#ea580c" });
+            break;
+          case "line":
+            shape = new Line([100, 100, 350, 100], { stroke: defaultStroke, strokeWidth: 4, fill: defaultStroke });
+            break;
+          case "arrow":
+            shape = new Line([100, 100, 350, 100], { stroke: "#dc2626", strokeWidth: 5, fill: "#dc2626" });
+            shape.set({ customType: "arrow" });
+            break;
+          case "diamond":
+            shape = new Polygon([{x:50, y:0}, {x:100, y:50}, {x:50, y:100}, {x:0, y:50}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "pentagon":
+            shape = new Polygon([{x:50, y:0}, {x:100, y:38}, {x:81, y:100}, {x:19, y:100}, {x:0, y:38}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "hexagon":
+            shape = new Polygon([{x:25, y:0}, {x:75, y:0}, {x:100, y:50}, {x:75, y:100}, {x:25, y:100}, {x:0, y:50}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "star":
+            shape = new Polygon([{x:50, y:0}, {x:60, y:35}, {x:95, y:35}, {x:65, y:55}, {x:75, y:90}, {x:50, y:70}, {x:25, y:90}, {x:35, y:55}, {x:5, y:35}, {x:40, y:35}], { left: 150, top: 150, fill: "#f59e0b" });
+            break;
+          case "block_arrow_right":
+            shape = new Polygon([{x:0, y:25}, {x:50, y:25}, {x:50, y:0}, {x:100, y:50}, {x:50, y:100}, {x:50, y:75}, {x:0, y:75}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "block_arrow_left":
+            shape = new Polygon([{x:100, y:25}, {x:50, y:25}, {x:50, y:0}, {x:0, y:50}, {x:50, y:100}, {x:50, y:75}, {x:100, y:75}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "block_arrow_up":
+            shape = new Polygon([{x:25, y:100}, {x:25, y:50}, {x:0, y:50}, {x:50, y:0}, {x:100, y:50}, {x:75, y:50}, {x:75, y:100}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "block_arrow_down":
+            shape = new Polygon([{x:25, y:0}, {x:25, y:50}, {x:0, y:50}, {x:50, y:100}, {x:100, y:50}, {x:75, y:50}, {x:75, y:0}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "plus":
+            shape = new Polygon([{x:35, y:0}, {x:65, y:0}, {x:65, y:35}, {x:100, y:35}, {x:100, y:65}, {x:65, y:65}, {x:65, y:100}, {x:35, y:100}, {x:35, y:65}, {x:0, y:65}, {x:0, y:35}, {x:35, y:35}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "minus":
+            shape = new Rect({ left: 150, top: 150, width: 100, height: 30, fill: defaultFill });
+            break;
+          case "multiply":
+            shape = new Polygon([{x:20, y:0}, {x:50, y:30}, {x:80, y:0}, {x:100, y:20}, {x:70, y:50}, {x:100, y:80}, {x:80, y:100}, {x:50, y:70}, {x:20, y:100}, {x:0, y:80}, {x:30, y:50}, {x:0, y:20}], { left: 150, top: 150, fill: defaultFill });
+            break;
+          case "divide":
+            const bar = new Rect({ left: 0, top: 40, width: 100, height: 20, fill: defaultFill });
+            const dot1 = new Circle({ left: 40, top: 0, radius: 10, fill: defaultFill });
+            const dot2 = new Circle({ left: 40, top: 80, radius: 10, fill: defaultFill });
+            shape = new Group([bar, dot1, dot2], { left: 150, top: 150 });
+            break;
+          case "equal":
+            const eq1 = new Rect({ left: 0, top: 20, width: 100, height: 20, fill: defaultFill });
+            const eq2 = new Rect({ left: 0, top: 60, width: 100, height: 20, fill: defaultFill });
+            shape = new Group([eq1, eq2], { left: 150, top: 150 });
+            break;
+          case "heart":
+            shape = new Path("M 50 30 A 20 20 0 0 1 90 30 Q 90 60 50 90 Q 10 60 10 30 A 20 20 0 0 1 50 30 z", { left: 150, top: 150, fill: "#ef4444" });
+            break;
+          case "cloud":
+            shape = new Path("M 25 60 a 20 20 0 0 1 0 -40 a 20 20 0 0 1 30 -10 a 20 20 0 0 1 30 10 a 20 20 0 0 1 0 40 z", { left: 150, top: 150, fill: "#9ca3af" });
+            break;
+          case "sun":
+            shape = new Path("M 50 10 L 55 25 L 70 20 L 65 35 L 80 40 L 65 45 L 70 60 L 55 55 L 50 70 L 45 55 L 30 60 L 35 45 L 20 40 L 35 35 L 30 20 L 45 25 Z M 50 30 A 10 10 0 1 1 50 50 A 10 10 0 1 1 50 30 Z", { left: 150, top: 150, fill: "#eab308", fillRule: "evenodd" });
+            break;
+          case "moon":
+            shape = new Path("M 50 10 A 40 40 0 1 0 90 50 A 30 30 0 1 1 50 10 z", { left: 150, top: 150, fill: "#fde047" });
+            break;
+          default:
+            return;
         }
 
-        if (shapeType === "circle") {
-          shape = new Circle({
-            left: 150,
-
-            top: 150,
-
-            radius: 80,
-
-            fill: "#7c3aed",
-          });
-        }
-
-        if (
-          shapeType === "triangle"
-        ) {
-          shape = new Triangle({
-            left: 150,
-
-            top: 150,
-
-            width: 180,
-
-            height: 160,
-
-            fill: "#ea580c",
-          });
-        }
-
-        if (shapeType === "line") {
-          shape = new Line(
-            [100, 100, 350, 100],
-            {
-              stroke: "#111827",
-
-              strokeWidth: 4,
-
-              fill: "#111827",
-            }
-          );
-        }
-
-        if (shapeType === "arrow") {
-          shape = new Line(
-            [100, 100, 350, 100],
-            {
-              stroke: "#dc2626",
-
-              strokeWidth: 5,
-
-              fill: "#dc2626",
-            }
-          );
-
-          shape.set({
-            customType: "arrow",
-          });
-        }
-
-        if (!shape) {
-          return;
-        }
+        if (!shape) return;
 
         configureObjectControls(shape);
 
@@ -2146,6 +2151,52 @@ if (property === "x") {
 
   saveHistory();
 },
+
+      async addMedia(url, type) {
+        const canvas = fabricCanvasRef.current;
+        if (!canvas || !url) return;
+
+        // We use a Rect as a placeholder in the canvas for the media
+        const mediaPlaceholder = new Rect({
+          left: 100,
+          top: 100,
+          width: 400,
+          height: 250,
+          fill: type === 'video' ? '#333333' : '#e0e0e0',
+          stroke: '#666666',
+          strokeWidth: 2,
+          customType: type,
+          srcUrl: url,
+        });
+
+        // Add a text label inside the placeholder to identify it
+        const text = new Textbox(type === 'video' ? '🎬 Video Media\n(Plays in Slideshow)' : '🎵 Audio Media\n(Plays in Slideshow)', {
+          left: 100,
+          top: 180,
+          width: 400,
+          fontSize: 24,
+          fill: type === 'video' ? '#ffffff' : '#000000',
+          textAlign: 'center',
+          customType: 'media-label',
+          selectable: false,
+          evented: false,
+        });
+
+        const group = new Group([mediaPlaceholder, text], {
+          left: 100,
+          top: 100,
+          customType: type,
+          srcUrl: url,
+        });
+
+        configureObjectControls(group);
+        canvas.add(group);
+        canvas.setActiveObject(group);
+        
+        canvas.requestRenderAll();
+        sendSelectionData(group);
+        saveHistory();
+      },
 
       async addPicture(file) {
         const canvas =

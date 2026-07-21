@@ -7,6 +7,7 @@ function InsertRibbon({
   onAddShape,
   onAddPicture,
   onAddSlide,
+  onAddMedia,
 }) {
   const [showShapes, setShowShapes] =
     useState(false);
@@ -29,12 +30,30 @@ function InsertRibbon({
     event.target.value = "";
   };
 
+  const mediaInputRef = useRef(null);
+
+  const handleMediaButton = () => {
+    mediaInputRef.current?.click();
+  };
+
+  const handleMediaChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Pass the file and the type (video or audio)
+    const type = file.type.startsWith("video") ? "video" : "audio";
+    onAddMedia?.(file, type);
+
+    event.target.value = "";
+  };
+
   return (
     <div className="insert-ribbon">
       <RibbonGroup label="Slides">
         <RibbonButton
           icon="+"
           label="New Slide"
+          onClick={onAddSlide}
         />
       </RibbonGroup>
 
@@ -112,11 +131,21 @@ function InsertRibbon({
         <RibbonButton
           icon="▶"
           label="Video"
+          onClick={handleMediaButton}
         />
 
         <RibbonButton
           icon="♪"
           label="Audio"
+          onClick={handleMediaButton}
+        />
+
+        <input
+          ref={mediaInputRef}
+          type="file"
+          accept="video/*,audio/*"
+          hidden
+          onChange={handleMediaChange}
         />
       </RibbonGroup>
     </div>

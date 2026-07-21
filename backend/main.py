@@ -1,12 +1,18 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.database.mongodb import database
 from app.api.routes.presentation_routes import router as presentation_router
+import os
 
 app = FastAPI(
     title="Presentation Creator API",
     version="1.0.0"
 )
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 
 app.add_middleware(
     CORSMiddleware,

@@ -22,22 +22,403 @@ z-index:999999;
 
 }
 
-.slideshow-slide{
+.slideshow-slide {
+  width: 1280px;
+  height: 720px;
+  background: white;
+  position: relative;
+  overflow: hidden;
+  font-family: Arial;
+}
 
-width:1280px;
+.slideshow-outgoing,
+.slideshow-incoming {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
-height:720px;
+.slideshow-incoming {
+  z-index: 1;
+}
 
-background:white;
+.slideshow-outgoing {
+  z-index: 2;
+}
 
-display:flex;
+/* --------------------
+   TRANSITION EFFECTS 
+--------------------- */
 
-flex-direction:column;
+/* FADE */
+.transition-fade .slideshow-outgoing {
+  animation: fadeOut ease-in-out forwards;
+}
+.transition-fade .slideshow-incoming {
+  animation: fadeIn ease-in-out forwards;
+}
 
-justify-content:center;
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
-align-items:center;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-font-family:Arial;
+/* PUSH */
+/* left */
+.transition-push.direction-left .slideshow-outgoing {
+  animation: pushOutLeft cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.transition-push.direction-left .slideshow-incoming {
+  animation: pushInLeft cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 
+/* right */
+.transition-push.direction-right .slideshow-outgoing {
+  animation: pushOutRight cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.transition-push.direction-right .slideshow-incoming {
+  animation: pushInRight cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* top */
+.transition-push.direction-top .slideshow-outgoing {
+  animation: pushOutTop cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.transition-push.direction-top .slideshow-incoming {
+  animation: pushInTop cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* bottom */
+.transition-push.direction-bottom .slideshow-outgoing {
+  animation: pushOutBottom cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.transition-push.direction-bottom .slideshow-incoming {
+  animation: pushInBottom cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes pushOutLeft { to { transform: translateX(-100%); } }
+@keyframes pushInLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes pushOutRight { to { transform: translateX(100%); } }
+@keyframes pushInRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes pushOutTop { to { transform: translateY(-100%); } }
+@keyframes pushInTop { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pushOutBottom { to { transform: translateY(100%); } }
+@keyframes pushInBottom { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+/* COVER (slides in over the old slide) */
+.transition-cover.direction-left .slideshow-incoming { animation: pushInLeft cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+.transition-cover.direction-right .slideshow-incoming { animation: pushInRight cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+.transition-cover.direction-top .slideshow-incoming { animation: pushInTop cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+.transition-cover.direction-bottom .slideshow-incoming { animation: pushInBottom cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+
+/* REVEAL (slides out old slide to reveal new slide) */
+.transition-reveal.direction-left .slideshow-outgoing { animation: pushOutLeft cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-reveal.direction-right .slideshow-outgoing { animation: pushOutRight cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-reveal.direction-top .slideshow-outgoing { animation: pushOutTop cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-reveal.direction-bottom .slideshow-outgoing { animation: pushOutBottom cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* WIPE */
+.transition-wipe.direction-left .slideshow-outgoing { animation: wipeLeft cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-wipe.direction-right .slideshow-outgoing { animation: wipeRight cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-wipe.direction-top .slideshow-outgoing { animation: wipeTop cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-wipe.direction-bottom .slideshow-outgoing { animation: wipeBottom cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+@keyframes wipeLeft { to { clip-path: inset(0 100% 0 0); } }
+@keyframes wipeRight { to { clip-path: inset(0 0 0 100%); } }
+@keyframes wipeTop { to { clip-path: inset(100% 0 0 0); } }
+@keyframes wipeBottom { to { clip-path: inset(0 0 100% 0); } }
+
+/* SPLIT */
+.transition-split.direction-vertical-out .slideshow-outgoing { animation: splitVerticalOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-split.direction-vertical-in .slideshow-incoming { animation: splitVerticalIn cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+.transition-split.direction-horizontal-out .slideshow-outgoing { animation: splitHorizontalOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-split.direction-horizontal-in .slideshow-incoming { animation: splitHorizontalIn cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+
+@keyframes splitVerticalOut { to { clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%); } }
+@keyframes splitVerticalIn { from { clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%); } to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } }
+@keyframes splitHorizontalOut { to { clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%); } }
+@keyframes splitHorizontalIn { from { clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%); } to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } }
+
+/* RANDOM (defaulting to fade for random as it's hard to do truly random in pure css, fallback) */
+.transition-random .slideshow-outgoing { animation: fadeOut ease-in-out forwards; }
+.transition-random .slideshow-incoming { animation: fadeIn ease-in-out forwards; }
+
+/* ZOOM */
+.transition-zoom.direction-in .slideshow-outgoing { animation: fadeOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-zoom.direction-in .slideshow-incoming { animation: zoomIn cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 3; }
+.transition-zoom.direction-out .slideshow-outgoing { animation: zoomOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-zoom.direction-out .slideshow-incoming { animation: fadeIn cubic-bezier(0.4, 0, 0.2, 1) forwards; z-index: 1; }
+
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+@keyframes zoomOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.5); } }
+
+/* DISSOLVE */
+.transition-dissolve .slideshow-outgoing { animation: dissolveOut ease-in-out forwards; }
+.transition-dissolve .slideshow-incoming { animation: dissolveIn ease-in-out forwards; z-index: 3; }
+
+@keyframes dissolveOut { to { opacity: 0; filter: blur(10px); } }
+@keyframes dissolveIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+
+/* CUT */
+.transition-cut .slideshow-outgoing { animation: cutOut step-end forwards; }
+.transition-cut .slideshow-incoming { animation: cutIn step-end forwards; }
+
+@keyframes cutOut { to { opacity: 0; } }
+@keyframes cutIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* FLASH */
+.transition-flash .slideshow-outgoing { animation: flashOut ease-in-out forwards; }
+.transition-flash .slideshow-incoming { animation: flashIn ease-in-out forwards; z-index: 3; }
+
+@keyframes flashOut { 0% { opacity: 1; } 50% { opacity: 0; filter: brightness(2); } 100% { opacity: 0; } }
+@keyframes flashIn { 0% { opacity: 0; filter: brightness(2); } 50% { opacity: 0; filter: brightness(2); } 100% { opacity: 1; filter: brightness(1); } }
+
+/* DOORS */
+.transition-doors.direction-horizontal .slideshow-outgoing { animation: splitHorizontalOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-doors.direction-vertical .slideshow-outgoing { animation: splitVerticalOut cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.transition-doors .slideshow-incoming { animation: fadeIn ease-in-out forwards; z-index: 1; }
+
+/* FLIP (Y axis) */
+.transition-flip .slideshow-outgoing { animation: flipOut ease-in-out forwards; backface-visibility: hidden; }
+.transition-flip .slideshow-incoming { animation: flipIn ease-in-out forwards; backface-visibility: hidden; z-index: 3; }
+
+@keyframes flipOut { to { transform: rotateY(90deg); opacity: 0; } }
+@keyframes flipIn { from { transform: rotateY(-90deg); opacity: 0; } to { transform: rotateY(0); opacity: 1; } }
+
+/* GENERIC FALLBACKS FOR UNIMPLEMENTED TRANSITIONS */
+.transition-morph .slideshow-outgoing, .transition-fall-over .slideshow-outgoing, .transition-drape .slideshow-outgoing, .transition-curtains .slideshow-outgoing, .transition-wind .slideshow-outgoing, .transition-prestige .slideshow-outgoing, .transition-fracture .slideshow-outgoing, .transition-crush .slideshow-outgoing, .transition-peel-off .slideshow-outgoing, .transition-page-curl .slideshow-outgoing, .transition-aeroplane .slideshow-outgoing, .transition-origami .slideshow-outgoing, .transition-checkerboard .slideshow-outgoing, .transition-blinds .slideshow-outgoing, .transition-clock .slideshow-outgoing, .transition-ripple .slideshow-outgoing, .transition-honeycomb .slideshow-outgoing, .transition-glitter .slideshow-outgoing, .transition-vortex .slideshow-outgoing, .transition-shred .slideshow-outgoing, .transition-switch .slideshow-outgoing, .transition-gallery .slideshow-outgoing, .transition-box .slideshow-outgoing, .transition-comb .slideshow-outgoing, .transition-pan .slideshow-outgoing, .transition-ferris-wheel .slideshow-outgoing, .transition-conveyor .slideshow-outgoing, .transition-rotate .slideshow-outgoing, .transition-window .slideshow-outgoing, .transition-orbit .slideshow-outgoing, .transition-fly-through .slideshow-outgoing, .transition-uncover .slideshow-outgoing, .transition-cube .slideshow-outgoing, .transition-shape .slideshow-outgoing, .transition-random-bars .slideshow-outgoing {
+  animation: dissolveOut ease-in-out forwards;
+}
+
+.transition-morph .slideshow-incoming, .transition-fall-over .slideshow-incoming, .transition-drape .slideshow-incoming, .transition-curtains .slideshow-incoming, .transition-wind .slideshow-incoming, .transition-prestige .slideshow-incoming, .transition-fracture .slideshow-incoming, .transition-crush .slideshow-incoming, .transition-peel-off .slideshow-incoming, .transition-page-curl .slideshow-incoming, .transition-aeroplane .slideshow-incoming, .transition-origami .slideshow-incoming, .transition-checkerboard .slideshow-incoming, .transition-blinds .slideshow-incoming, .transition-clock .slideshow-incoming, .transition-ripple .slideshow-incoming, .transition-honeycomb .slideshow-incoming, .transition-glitter .slideshow-incoming, .transition-vortex .slideshow-incoming, .transition-shred .slideshow-incoming, .transition-switch .slideshow-incoming, .transition-gallery .slideshow-incoming, .transition-box .slideshow-incoming, .transition-comb .slideshow-incoming, .transition-pan .slideshow-incoming, .transition-ferris-wheel .slideshow-incoming, .transition-conveyor .slideshow-incoming, .transition-rotate .slideshow-incoming, .transition-window .slideshow-incoming, .transition-orbit .slideshow-incoming, .transition-fly-through .slideshow-incoming, .transition-uncover .slideshow-incoming, .transition-cube .slideshow-incoming, .transition-shape .slideshow-incoming, .transition-random-bars .slideshow-incoming {
+  animation: dissolveIn ease-in-out forwards; z-index: 3;
+}
+
+
+/* --------------------
+   PRESENTER VIEW 
+--------------------- */
+.presenter-layout {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #1e1e1e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  z-index: 10000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.presenter-header {
+  height: 50px;
+  background: #2d2d2d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid #444;
+}
+
+.presenter-end-btn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.presenter-end-btn:hover { background: #444; }
+
+.presenter-timer, .presenter-clock {
+  font-size: 18px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.presenter-body {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+  gap: 20px;
+}
+
+.presenter-main {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.presenter-sidebar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.presenter-main-label, .presenter-sidebar-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.presenter-canvas-wrapper {
+  flex: 1;
+  background: #000;
+  border: 1px solid #444;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Override standard slide styles to fit inside the presenter wrapper without scrolling */
+.presenter-canvas-wrapper .slideshow-slide {
+  transform-origin: center center;
+  /* We use CSS zoom or transform to scale down the 1280x720 canvas, 
+     For simple responsiveness, a quick scale works if container is smaller, 
+     but setting max-width/max-height is cleaner if we rebuild the canvas, 
+     but since Fabric is absolute 1280x720, we scale the div. */
+  transform: scale(0.65); 
+}
+
+.presenter-next-slide {
+  flex: 1;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.presenter-preview-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  background: #000;
+  border: 1px solid #555;
+}
+
+.presenter-end-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 18px;
+  border: 1px dashed #555;
+}
+
+.presenter-notes {
+  flex: 1;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.presenter-notes-content {
+  flex: 1;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #e0e0e0;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* --------------------
+   NEW FEATURES (End Screen, Controls, Laser)
+--------------------- */
+
+.slideshow-end-screen {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.slideshow-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.slideshow-player:hover .slideshow-controls {
+  opacity: 1;
+}
+
+.slideshow-control-btn {
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.slideshow-control-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.slideshow-control-btn.active { background: rgba(255, 255, 255, 0.4); }
+
+.slideshow-context-menu {
+  position: absolute;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 5px 0;
+  z-index: 200;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+  min-width: 150px;
+}
+
+.slideshow-context-item {
+  padding: 8px 15px;
+  color: #eee;
+  cursor: pointer;
+  font-size: 14px;
+}
+.slideshow-context-item:hover { background: #444; }
+
+.laser-pointer-active .slideshow-slide {
+  cursor: none !important;
+}
+
+.laser-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.8);
 }

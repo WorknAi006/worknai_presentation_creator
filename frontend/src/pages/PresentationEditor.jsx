@@ -2,12 +2,14 @@ import {
   createPresentation,
   updatePresentation,
   getPresentations,
+  uploadMedia,
 } from "../services/presentationApi";
 
 import {
   useCallback,
   useRef,
   useState,
+  useEffect,
 } from "react";
 
 import TopToolbar from "../editor/toolbar/TopToolbar";
@@ -35,6 +37,8 @@ import "../editor/animations/animations.css";
 import FileBackstage from "../editor/file/FileBackstage";
 import SlideShowRibbon from "../editor/slideshow/SlideShowRibbon";
 import SlideShowPlayer from "../editor/slideshow/SlideShowPlayer";
+
+import { DrawToolbar, DrawCanvas, DrawRuler, useDrawStore } from "../features/draw";
 
 
 function PresentationEditor() {
@@ -89,17 +93,48 @@ function PresentationEditor() {
     canRedo: false,
   });
 
+  const rulerVisible = useDrawStore((s) => s.rulerVisible);
+
   const [showAnimationPane, setShowAnimationPane] = useState(false);
   const [animationPainterActive, setAnimationPainterActive] = useState(false);
   const [animationPainterData, setAnimationPainterData] = useState(null);
   const [selectedAnimationIndex, setSelectedAnimationIndex] = useState(0);
   const [animatedObjectsCoords, setAnimatedObjectsCoords] = useState([]);
+  
   // ==============================
-// Slide Show
-// ==============================
+  // Export Modes & Slide Show
+  // ==============================
 
-const [showSlideShow, setShowSlideShow] =
-  useState(false);
+  const [exportMode, setExportMode] = useState(null);
+  const [showSlideShow, setShowSlideShow] = useState(false);
+  const [useTimings, setUseTimings] = useState(true);
+  const [usePresenterView, setUsePresenterView] = useState(false);
+  const [startSlideIndex, setStartSlideIndex] = useState(0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get('presentationId');
+    const mode = params.get('mode');
+    
+    if (pid && mode) {
+      setExportMode(mode);
+      fetch(`http://127.0.0.1:8000/api/presentations/${pid}`)
+        .then(res => res.json())
+        .then(data => {
+          setPresentationId(data._id);
+          updateSlides(data.slides);
+          if (data.slides.length > 0) {
+            updateActiveSlideId(data.slides[0].id);
+            editorCanvasRef.current?.loadCanvasJSON(data.slides[0].canvasJSON);
+          }
+          if (mode === 'mp4') {
+            setStartSlideIndex(0);
+            setShowSlideShow(true);
+          }
+        })
+        .catch(err => console.error("Auto load failed", err));
+    }
+  }, []);
 
   // =============================
 // DESIGN TAB STATE
@@ -150,11 +185,16 @@ useState(false);
     console.log("Preview animations clicked");
   };
 
- const handleStartSlideShow = () => {
-
+ const handleStartFromBeginning = () => {
+    setStartSlideIndex(0);
     setShowSlideShow(true);
+ };
 
-};
+ const handleStartFromCurrent = () => {
+    const idx = slidesRef.current.findIndex(s => s.id === activeSlideIdRef.current);
+    setStartSlideIndex(idx >= 0 ? idx : 0);
+    setShowSlideShow(true);
+ };
 
   const updateSlides = useCallback(
     (nextSlides) => {
@@ -275,6 +315,16 @@ useState(false);
     editorCanvasRef.current?.addPicture(
       file
     );
+  };
+
+  const handleAddMedia = async (file, type) => {
+    try {
+      const response = await uploadMedia(file);
+      editorCanvasRef.current?.addMedia(response.url, type);
+    } catch (err) {
+      console.error("Failed to upload media:", err);
+      alert("Failed to upload media.");
+    }
   };
 
   const handleUndo = () => {
@@ -869,6 +919,28 @@ const handleExport = async (format) => {
   }
 };
 
+  if (exportMode === 'pdf') {
+    return (
+      <div className="pdf-export-mode" style={{ display: 'flex', flexDirection: 'column', gap: '20px', background: '#f0f0f0', padding: '20px', alignItems: 'center' }}>
+        {slides.map(slide => (
+          <div key={slide.id} className="pdf-slide-container" style={{ width: '1280px', height: '720px', background: 'white', position: 'relative', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+             {/* Render a static snapshot of the slide if possible, or just the fabric JSON */}
+             {slide.preview ? (
+               <img src={slide.preview} alt="slide" style={{ width: '100%', height: '100%' }} />
+             ) : (
+               <div style={{ padding: '20px', color: 'black' }}>Slide {slide.id}</div>
+             )}
+             <DrawCanvas
+                slideId={slide.id}
+                initialStrokes={slide.drawStrokes}
+                readOnly
+             />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="presentation-editor">
       <TopToolbar
@@ -956,6 +1028,7 @@ onAlignBottom={
           onAddPicture={
             handleAddPicture
           }
+          onAddMedia={handleAddMedia}
           onAddSlide={
             handleAddSlide
           }
@@ -1056,17 +1129,24 @@ setShowFormatBackground(
 
 {activeTab === "Slide Show" && (
   <SlideShowRibbon
-    onFromBeginning={handleStartSlideShow}
+    onFromBeginning={handleStartFromBeginning}
+    onFromCurrentSlide={handleStartFromCurrent}
+    useTimings={useTimings}
+    setUseTimings={setUseTimings}
+    usePresenterView={usePresenterView}
+    setUsePresenterView={setUsePresenterView}
   />
 )}
+{activeTab === "Draw" && <DrawToolbar />}
       <main
         className={
         activeTab === "Insert" ||
         activeTab === "Home" ||
         activeTab === "Transitions" ||
         activeTab === "Animations" ||
-        activeTab === "Design"
-        
+        activeTab === "Design" ||
+        activeTab === "Draw"
+
             ? "editor-layout ribbon-open"
             : "editor-layout"
   }
@@ -1111,6 +1191,20 @@ setShowFormatBackground(
               {badge.order}
             </div>
           ))}
+
+          <DrawCanvas
+            slideId={activeSlideId}
+            active={activeTab === "Draw"}
+            matchSelector=".slide-canvas-container"
+            initialStrokes={slides.find((s) => s.id === activeSlideId)?.drawStrokes}
+            onStrokesChange={(slideId, strokes) => {
+              const updated = slides.map((s) =>
+                s.id === slideId ? { ...s, drawStrokes: strokes } : s
+              );
+              updateSlides(updated);
+            }}
+          />
+          <DrawRuler visible={activeTab === "Draw" && rulerVisible} matchSelector=".slide-canvas-container" />
         </section>
 
         <PropertiesPanel
@@ -1126,13 +1220,11 @@ setShowFormatBackground(
   )}
   {showSlideShow && (
  <SlideShowPlayer
-  onClose={() =>
-    setShowSlideShow(false)
-  }
-
+  onClose={() => setShowSlideShow(false)}
   slides={slides}
-
-  activeSlideId={activeSlideId}
+  startIndex={startSlideIndex}
+  useTimings={useTimings}
+  usePresenterView={usePresenterView}
 />
 )}
     </div>

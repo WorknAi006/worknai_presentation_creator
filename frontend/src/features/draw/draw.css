@@ -1,0 +1,211 @@
+/* Draw tab - isolated styles, scoped under .draw-ribbon / .draw-ruler-root / .draw-canvas-root
+   so nothing here can affect Home/Insert/Design/etc. ribbons or the slide canvas. */
+
+.draw-ribbon {
+  height: 116px;
+  display: flex;
+  align-items: stretch;
+  background: #ffffff;
+  border-bottom: 1px solid #d1d5db;
+  padding: 8px 10px 0;
+}
+
+.draw-ribbon .ribbon-button.active {
+  background: #e0edff;
+  box-shadow: inset 0 0 0 1px #2684ff;
+}
+
+.draw-ribbon .ribbon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.draw-swatch-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.draw-swatch-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.draw-swatch {
+  width: 44px;
+  height: 80px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 6px 2px;
+  cursor: pointer;
+}
+
+.draw-swatch:hover,
+.draw-swatch-wrapper.active .draw-swatch {
+  background: #f3f4f6;
+}
+
+.draw-swatch-wrapper.active .draw-swatch {
+  box-shadow: inset 0 0 0 1px #2684ff;
+}
+
+.draw-swatch-nib {
+  width: 6px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.draw-swatch-label {
+  font-size: 10px;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.draw-swatch-caret {
+  border: none;
+  background: transparent;
+  font-size: 9px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.draw-swatch-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 160px;
+}
+
+.draw-popover-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #374151;
+  gap: 8px;
+}
+
+.draw-add-button {
+  width: 28px;
+  height: 28px;
+  align-self: center;
+  margin-bottom: 26px;
+  border: 1px dashed #9ca3af;
+  border-radius: 50%;
+  background: transparent;
+  color: #374151;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.draw-add-button:hover {
+  background: #f3f4f6;
+}
+
+.draw-add-menu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 20;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.draw-add-menu-item {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #111827;
+  cursor: pointer;
+}
+
+.draw-add-menu-item:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.draw-add-menu-item:disabled {
+  color: #9ca3af;
+  cursor: default;
+}
+
+/* Ruler overlay */
+
+.draw-ruler-h {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid #d1d5db;
+}
+
+.draw-ruler-v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-right: 1px solid #d1d5db;
+}
+
+.draw-ruler-tick {
+  position: absolute;
+  top: 2px;
+  font-size: 8px;
+  color: #6b7280;
+  border-left: 1px solid #9ca3af;
+  padding-left: 2px;
+  height: 100%;
+}
+
+.draw-ruler-tick-v {
+  position: absolute;
+  left: 2px;
+  font-size: 8px;
+  color: #6b7280;
+  border-top: 1px solid #9ca3af;
+  width: 100%;
+}
+
+.draw-ruler-guide-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed rgba(38, 132, 255, 0.5);
+}
+
+.draw-ruler-guide-v {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed rgba(38, 132, 255, 0.5);
+}

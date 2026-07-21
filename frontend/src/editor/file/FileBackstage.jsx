@@ -348,10 +348,20 @@ Open
 
       <button
         type="button"
+        className="export-option"
         onClick={() => onExport?.("pdf")}
       >
-        <strong>Download </strong>
-        <span>pdf</span>
+        <strong>PDF Document</strong>
+        <span>Download as .pdf</span>
+      </button>
+
+      <button
+        type="button"
+        className="export-option"
+        onClick={() => onExport?.("mp4")}
+      >
+        <strong>Video Presentation</strong>
+        <span>Download as .mp4</span>
       </button>
     </div>
   </div>

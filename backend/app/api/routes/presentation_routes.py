@@ -18,6 +18,27 @@ router = APIRouter(
 )
 
 
+from fastapi import UploadFile, File
+import shutil
+import os
+import uuid
+
+@router.post("/upload")
+async def upload_media(file: UploadFile = File(...)):
+    try:
+        # Create unique filename
+        ext = file.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{ext}"
+        filepath = os.path.join("uploads", filename)
+        
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        return {"url": f"http://127.0.0.1:8000/uploads/{filename}"}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/")
 async def create_presentation(presentation: PresentationCreate):
     try:
@@ -275,3 +296,96 @@ async def export_presentation_pptx(
         },
     )
 
+import os
+import glob
+import subprocess
+import asyncio
+from playwright.async_api import async_playwright
+
+@router.get("/{presentation_id}/export/pdf")
+async def export_presentation_pdf(presentation_id: str):
+    presentation_data = await PresentationController.get_by_id(presentation_id)
+    if not presentation_data:
+        raise HTTPException(status_code=404, detail="Presentation not found")
+
+    title = presentation_data.get("title", "presentation")
+    safe_title = title.replace(" ", "_").replace("/", "_").replace("\\", "_")
+    
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+        url = f"http://localhost:5173/?presentationId={presentation_id}&mode=pdf"
+        await page.goto(url, wait_until="networkidle")
+        
+        await page.wait_for_timeout(2000)
+        
+        pdf_bytes = await page.pdf(
+            format="Letter",
+            landscape=True,
+            print_background=True
+        )
+        await browser.close()
+        
+    return StreamingResponse(
+        BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}.pdf"'
+        },
+    )
+
+@router.get("/{presentation_id}/export/mp4")
+async def export_presentation_mp4(presentation_id: str):
+    presentation_data = await PresentationController.get_by_id(presentation_id)
+    if not presentation_data:
+        raise HTTPException(status_code=404, detail="Presentation not found")
+
+    title = presentation_data.get("title", "presentation")
+    safe_title = title.replace(" ", "_").replace("/", "_").replace("\\", "_")
+    
+    video_dir = f"./temp_video_{presentation_id}"
+    os.makedirs(video_dir, exist_ok=True)
+    
+    slides = presentation_data.get("slides", [])
+    total_time_ms = len(slides) * 5000 + 2000 
+    
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context(
+            record_video_dir=video_dir,
+            record_video_size={"width": 1280, "height": 720}
+        )
+        page = await context.new_page()
+        url = f"http://localhost:5173/?presentationId={presentation_id}&mode=mp4"
+        
+        await page.goto(url)
+        await page.wait_for_timeout(total_time_ms)
+        
+        await context.close()
+        await browser.close()
+        
+    webm_files = glob.glob(f"{video_dir}/*.webm")
+    if not webm_files:
+        raise HTTPException(status_code=500, detail="Video recording failed")
+        
+    webm_file = webm_files[0]
+    mp4_file = f"{video_dir}/output.mp4"
+    
+    subprocess.run([
+        "ffmpeg", "-y", "-i", webm_file, "-c:v", "libx264", "-c:a", "aac", mp4_file
+    ], check=True)
+    
+    with open(mp4_file, "rb") as f:
+        mp4_bytes = f.read()
+        
+    os.remove(webm_file)
+    os.remove(mp4_file)
+    os.rmdir(video_dir)
+    
+    return StreamingResponse(
+        BytesIO(mp4_bytes),
+        media_type="video/mp4",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}.mp4"'
+        },
+    )
